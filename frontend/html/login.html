@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OdontoSoft - Iniciar Sesión</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg-dark); }
+    .login-card { background:#fff; border-radius:16px; padding:40px; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+    .login-brand { display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:30px; }
+    .login-brand span.material-symbols-outlined { font-size:2rem; color:var(--primary-color); }
+    .login-brand h1 { font-size:1.8rem; font-weight:800; color:var(--text-main); }
+    .login-brand h1 span { color:var(--primary-color); }
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div class="login-card">
+  <div class="login-brand">
+    <span class="material-symbols-outlined">dentistry</span>
+    <h1>Odonto<span>Soft</span></h1>
+  </div>
+  <p style="text-align:center;color:var(--text-muted);margin-bottom:24px;font-size:0.95rem">Sistema de Gestión Odontológica</p>
+
+  <div class="form-group">
+    <label>Correo Electrónico</label>
+    <input type="email" id="inCorreo" placeholder="usuario@dental.com">
+  </div>
+  <div class="form-group">
+    <label>Contraseña</label>
+    <input type="password" id="inPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') ingresar()">
+  </div>
+
+  <button class="btn-primary" style="width:100%;justify-content:center;margin-top:10px" onclick="ingresar()">
+    <span class="material-symbols-outlined">login</span> Ingresar
+  </button>
+
+  <p style="text-align:center;margin-top:20px;font-size:0.85rem;color:var(--text-muted)">
+    ¿No tienes cuenta? Contacta al administrador.
+  </p>
+</div>
+
+<script>
+  function toast(msg, tipo = "success") {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.className = `toast show ${tipo}`;
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  async function ingresar() {
+    const correo   = document.getElementById("inCorreo").value.trim();
+    const password = document.getElementById("inPassword").value;
+    if (!correo || !password) { toast("Completa todos los campos", "error"); return; }
+
+    // Verificar que el usuario existe en la API
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/usuarios`);
+      const usuarios = await res.json();
+      const usuario = usuarios.find(u => u.correo === correo);
+      if (usuario) {
+        toast(`Bienvenido, ${usuario.nombre}`);
+        setTimeout(() => window.location.href = "panel.html", 1000);
+      } else {
+        toast("Correo no encontrado", "error");
+      }
+    } catch {
+      // Si la API no está disponible, redirigir igual (modo demo)
+      toast("Entrando en modo demo...");
+      setTimeout(() => window.location.href = "panel.html", 1200);
+    }
+  }
+</script>
+</body>
+</html>
