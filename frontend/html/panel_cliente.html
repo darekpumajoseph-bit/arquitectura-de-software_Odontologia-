@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OdontoSoft - Paciente</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- Modal Agendar Cita -->
+<div id="modalCita" class="modal-overlay">
+  <div class="modal">
+    <h3>Agendar Nueva Cita</h3>
+    <div class="form-group">
+      <label>Odontólogo</label>
+      <select id="inOdontologo"></select>
+    </div>
+    <div class="form-group">
+      <label>Tratamiento</label>
+      <select id="inTratamiento"></select>
+    </div>
+    <div class="form-group">
+      <label>Fecha y Hora</label>
+      <input type="datetime-local" id="inFecha">
+    </div>
+    <div class="form-group">
+      <label>Notas</label>
+      <textarea id="inNotas" rows="2" placeholder="Observaciones opcionales..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="agendarCita()">
+        <span class="material-symbols-outlined">calendar_month</span> Agendar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-container">
+  <aside class="sidebar" style="background-color:#1e293b">
+    <div class="sidebar-brand">
+      <span class="material-symbols-outlined">account_circle</span>
+      <span>Paciente</span>
+    </div>
+    <nav class="sidebar-menu">
+      <a href="panel_cliente.html" class="active"><span class="material-symbols-outlined">medical_information</span> Servicios</a>
+      <a href="contacto.html"><span class="material-symbols-outlined">support_agent</span> Soporte</a>
+      <a href="login.html"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="content-header">
+      <div>
+        <h2> Tratamientos y Servicios</h2>
+        <p style="color:var(--text-muted)">Paciente ID: <span id="pacienteId">1</span>
+          &nbsp;|&nbsp;
+          <input type="number" id="inputPacienteId" value="1" min="1"
+            style="width:60px;padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;"
+            onchange="cambiarPaciente(this.value)">
+        </p>
+      </div>
+      <button class="btn-primary" onclick="abrirModal()">
+        <span class="material-symbols-outlined">calendar_month</span> Agendar Nueva Cita
+      </button>
+    </header>
+
+    <h3 style="margin-bottom:16px;font-size:1.1rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">
+      Servicios Adquiridos
+    </h3>
+    <section class="table-container" style="margin-bottom:30px">
+      <table>
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Odontólogo ID</th>
+            <th>Próxima Cita</th>
+            <th>Estado de Cuenta</th>
+          </tr>
+        </thead>
+        <tbody id="tablaServicios">
+          <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h3 style="margin-bottom:16px;font-size:1.1rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">
+      Citas
+    </h3>
+    <section class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Tratamiento ID</th>
+            <th>Odontólogo ID</th>
+            <th>Fecha y Hora</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCitas">
+          <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+  let pacienteActual = 1;
+
+  function toast(msg, tipo = "success") {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.className = `toast show ${tipo}`;
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  async function api(method, path, body = null) {
+    const res = await fetch(`${API}${path}`, {
+      method, headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : null
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Error"); }
+    return res.json();
+  }
+
+  async function cargarDatos() {
+    const [servicios, citas] = await Promise.all([
+      api("GET", `/servicios/paciente/${pacienteActual}`).catch(() => []),
+      api("GET", `/citas/paciente/${pacienteActual}`).catch(() => [])
+    ]);
+
+    const tbS = document.getElementById("tablaServicios");
+    const colCuenta = { "Pagado": "green", "Saldo Pendiente": "yellow" };
+    tbS.innerHTML = servicios.length
+      ? servicios.map(s => `
+          <tr>
+            <td><strong>Tratamiento #${s.tratamiento_id}</strong></td>
+            <td>${s.odontologo_id || '—'}</td>
+            <td>${s.proxima_cita || 'Por definir'}</td>
+            <td><span class="badge ${colCuenta[s.estado_cuenta] || 'yellow'}">${s.estado_cuenta}</span></td>
+          </tr>`).join("")
+      : `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Sin servicios registrados</td></tr>`;
+
+    const tbC = document.getElementById("tablaCitas");
+    const colEstado = { "En Espera": "yellow", "En Consulta": "blue", "Finalizado": "green" };
+    tbC.innerHTML = citas.length
+      ? citas.map(c => `
+          <tr>
+            <td>${c.tratamiento_id || '—'}</td>
+            <td>${c.odontologo_id}</td>
+            <td>${c.fecha_hora}</td>
+            <td><span class="badge ${colEstado[c.estado] || 'blue'}">${c.estado}</span></td>
+          </tr>`).join("")
+      : `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Sin citas registradas</td></tr>`;
+  }
+
+  function cambiarPaciente(id) {
+    pacienteActual = parseInt(id) || 1;
+    document.getElementById("pacienteId").textContent = pacienteActual;
+    cargarDatos();
+  }
+
+  async function abrirModal() {
+    const [usuarios, tratamientos] = await Promise.all([
+      api("GET", "/usuarios"), api("GET", "/tratamientos")
+    ]);
+    document.getElementById("inOdontologo").innerHTML =
+      usuarios.map(u => `<option value="${u.id}">${u.nombre}</option>`).join("");
+    document.getElementById("inTratamiento").innerHTML =
+      `<option value="">— Sin tratamiento —</option>` +
+      tratamientos.map(t => `<option value="${t.id}">${t.nombre}</option>`).join("");
+    document.getElementById("inFecha").value = "";
+    document.getElementById("inNotas").value = "";
+    document.getElementById("modalCita").classList.add("open");
+  }
+
+  function cerrarModal() { document.getElementById("modalCita").classList.remove("open"); }
+
+  async function agendarCita() {
+    const trat = document.getElementById("inTratamiento").value;
+    const data = {
+      paciente_id:    pacienteActual,
+      odontologo_id:  parseInt(document.getElementById("inOdontologo").value),
+      tratamiento_id: trat ? parseInt(trat) : null,
+      fecha_hora:     document.getElementById("inFecha").value,
+      estado:         "En Espera",
+      notas:          document.getElementById("inNotas").value || null
+    };
+    try {
+      await api("POST", "/citas", data);
+      toast("Cita agendada correctamente");
+      cerrarModal(); cargarDatos();
+    } catch(e) { toast(e.message, "error"); }
+  }
+
+  cargarDatos();
+</script>
+</body>
+</html>
