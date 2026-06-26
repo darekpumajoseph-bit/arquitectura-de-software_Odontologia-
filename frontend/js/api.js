@@ -53,3 +53,5 @@ export const getProveedores   = ()           => request("GET",    "/proveedores"
 export const createProveedor  = (data)       => request("POST",   "/proveedores", data);
 export const updateProveedor  = (id, data)   => request("PUT",    `/proveedores/${id}`, data);
 export const deleteProveedor  = (id)         => request("DELETE", `/proveedores/${id}`);
+ 
+
