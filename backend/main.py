@@ -1,66 +1,57 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from datetime import datetime
-
 from database import engine
 import models
 
-# Crear todas las tablas en la base de datos SQLite
-models.Base.metadata.create_all(bind=engine)
-
-# Importar routers
-from routers import roles, usuarios, tratamientos, citas, servicios, proveedores
+from routers import (
+    usuarios, pacientes, odontologos, consultorios,
+    historias_clinicas, citas, tratamientos,
+    recordatorios, pagos, facturas,
+    auth  # <-- Importar auth
+)
 
 app = FastAPI(
     title="OdontoSoft API",
-    description="Sistema de Gestión Odontológica — Backend REST con FastAPI + SQLite",
-    version="1.0.0"
+    description="Sistema de Gestión Odontológica — Backend REST con FastAPI + PostgreSQL",
+    version="2.0.0"
 )
 
-# ── CORS ───────────────────────────────────────────────────────────────────────
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # En producción, limitar al dominio del frontend
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── MIDDLEWARE DE LOG ──────────────────────────────────────────────────────────
+# Middleware de log
 @app.middleware("http")
 async def registrar_peticiones(request: Request, call_next):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {request.method} {request.url.path}")
     response = await call_next(request)
     return response
 
-# ── EXCEPCIONES PERSONALIZADAS ─────────────────────────────────────────────────
-class RecursoNoEncontrado(Exception):
-    def __init__(self, recurso: str):
-        self.recurso = recurso
-
-@app.exception_handler(RecursoNoEncontrado)
-async def recurso_error(request: Request, exc: RecursoNoEncontrado):
-    return JSONResponse(
-        status_code=404,
-        content={"error": True, "mensaje": f"{exc.recurso} no encontrado", "hora": str(datetime.now())}
-    )
-
-# ── ROUTERS ────────────────────────────────────────────────────────────────────
-app.include_router(roles.router)
+# Routers
 app.include_router(usuarios.router)
-app.include_router(tratamientos.router)
+app.include_router(pacientes.router)
+app.include_router(odontologos.router)
+app.include_router(consultorios.router)
+app.include_router(historias_clinicas.router)
 app.include_router(citas.router)
-app.include_router(servicios.router)
-app.include_router(proveedores.router)
+app.include_router(tratamientos.router)
+app.include_router(recordatorios.router)
+app.include_router(pagos.router)
+app.include_router(facturas.router)
+app.include_router(auth.router)  # <-- Registrar auth
 
-# ── RUTA RAÍZ ──────────────────────────────────────────────────────────────────
 @app.get("/", tags=["Root"])
 def root():
     return {
         "sistema": "OdontoSoft API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "documentacion": "/docs",
-        "estado": "Activo"
+        "estado": "Activo",
+        "base_datos": "PostgreSQL - ProyectoApi"
     }

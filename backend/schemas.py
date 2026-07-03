@@ -1,113 +1,218 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from datetime import datetime
+from datetime import date, time, datetime
+from decimal import Decimal
 
 
-# ── ROLES ──────────────────────────────────────────────────────────────────────
-
-class RolBase(BaseModel):
-    nombre:      str
-    descripcion: Optional[str] = None
-    permisos:    Optional[str] = None
-
-class RolCreate(RolBase):
-    pass
-
-class RolOut(RolBase):
-    id: int
-    class Config:
-        from_attributes = True
-
-
-# ── USUARIOS ───────────────────────────────────────────────────────────────────
+# ── USUARIO ───────────────────────────────────────────────────────────────────
 
 class UsuarioBase(BaseModel):
-    nombre:         str
-    correo:         EmailStr
-    identificacion: str
-    estado:         Optional[str] = "Activo"
-    rol_id:         int
+    correo: EmailStr
+    rol: str
+    estado: str = "Activo"
 
 class UsuarioCreate(UsuarioBase):
-    password: str          # Texto plano → se hashea en la ruta
+    contrasena: str = Field(..., min_length=6, description="Mínimo 6 caracteres")
 
 class UsuarioOut(UsuarioBase):
-    id:        int
-    creado_en: Optional[datetime]
-    rol:       Optional[RolOut]
+    id_usuario: int
     class Config:
         from_attributes = True
 
 
-# ── TRATAMIENTOS ───────────────────────────────────────────────────────────────
+# ── PACIENTE ──────────────────────────────────────────────────────────────────
 
-class TratamientoBase(BaseModel):
-    nombre:      str
-    descripcion: Optional[str] = None
-    precio_base: Optional[int] = 0
+class PacienteBase(BaseModel):
+    nombre: str
+    apellido: str
+    documento: str
+    fecha_nacimiento: Optional[date] = None
+    genero: Optional[str] = None
+    direccion: Optional[str] = None
+    telefono: Optional[str] = None
+    correo: Optional[EmailStr] = None
+    eps: Optional[str] = None
+    alergias: Optional[str] = None
 
-class TratamientoCreate(TratamientoBase):
+class PacienteCreate(PacienteBase):
     pass
 
-class TratamientoOut(TratamientoBase):
-    id: int
+class PacienteOut(PacienteBase):
+    id_paciente: int
     class Config:
         from_attributes = True
 
 
-# ── CITAS ──────────────────────────────────────────────────────────────────────
+# ── REGISTRO (para el frontend) ──────────────────────────────────────────────
+# ── REGISTRO DE USUARIO (con datos de paciente) ──────────────────────────────
+
+class RegistroUsuario(BaseModel):
+    correo: EmailStr
+    contrasena: str
+    nombre: str
+    apellido: str
+    telefono: str
+    
+class RegistroRequest(BaseModel):
+    correo: EmailStr
+    contrasena: str = Field(..., min_length=6)
+    nombre: str
+    apellido: str
+    telefono: str
+
+class RegistroResponse(BaseModel):
+    mensaje: str
+    id_usuario: int
+    id_paciente: int
+    correo: str
+    rol: str
+
+
+
+# ── CONSULTORIO ──────────────────────────────────────────────────────────────
+
+class ConsultorioBase(BaseModel):
+    nombre: str
+    ubicacion: Optional[str] = None
+    numero_sala: Optional[str] = None
+
+class ConsultorioCreate(ConsultorioBase):
+    pass
+
+class ConsultorioOut(ConsultorioBase):
+    id_consultorio: int
+    class Config:
+        from_attributes = True
+
+
+# ── ODONTOLOGO ───────────────────────────────────────────────────────────────
+
+class OdontologoBase(BaseModel):
+    nombre: str
+    apellido: str
+    documento: str
+    telefono: Optional[str] = None
+    correo: Optional[str] = None
+    especialidad: Optional[str] = None
+    registro_profesional: Optional[str] = None
+    horario: Optional[str] = None
+    id_consultorio: int
+
+class OdontologoCreate(OdontologoBase):
+    pass
+
+class OdontologoOut(OdontologoBase):
+    id_odontologo: int
+    class Config:
+        from_attributes = True
+
+
+# ── HISTORIA CLINICA ─────────────────────────────────────────────────────────
+
+class HistoriaClinicaBase(BaseModel):
+    fecha_apertura: date
+    antecedentes: Optional[str] = None
+    diagnostico_general: Optional[str] = None
+    observaciones: Optional[str] = None
+    id_paciente: int
+
+class HistoriaClinicaCreate(HistoriaClinicaBase):
+    pass
+
+class HistoriaClinicaOut(HistoriaClinicaBase):
+    id_historia: int
+    class Config:
+        from_attributes = True
+
+
+# ── CITA ─────────────────────────────────────────────────────────────────────
 
 class CitaBase(BaseModel):
-    paciente_id:    int
-    odontologo_id:  int
-    tratamiento_id: Optional[int] = None
-    fecha_hora:     str
-    estado:         Optional[str] = "En Espera"
-    notas:          Optional[str] = None
+    fecha: date
+    hora: time
+    estado: Optional[str] = None
+    motivo_consulta: Optional[str] = None
+    observaciones: Optional[str] = None
+    id_paciente: int
+    id_odontologo: int
+    id_consultorio: int
 
 class CitaCreate(CitaBase):
     pass
 
 class CitaOut(CitaBase):
-    id:        int
-    creado_en: Optional[datetime]
+    id_cita: int
     class Config:
         from_attributes = True
 
 
-# ── SERVICIOS ──────────────────────────────────────────────────────────────────
+# ── TRATAMIENTO ──────────────────────────────────────────────────────────────
 
-class ServicioBase(BaseModel):
-    paciente_id:    int
-    tratamiento_id: int
-    odontologo_id:  Optional[int] = None
-    proxima_cita:   Optional[str] = None
-    estado_cuenta:  Optional[str] = "Saldo Pendiente"
+class TratamientoBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    costo: Optional[Decimal] = None
+    duracion_estimada: Optional[str] = None
+    id_cita: int
 
-class ServicioCreate(ServicioBase):
+class TratamientoCreate(TratamientoBase):
     pass
 
-class ServicioOut(ServicioBase):
-    id:        int
-    creado_en: Optional[datetime]
+class TratamientoOut(TratamientoBase):
+    id_tratamiento: int
     class Config:
         from_attributes = True
 
 
-# ── PROVEEDORES ────────────────────────────────────────────────────────────────
+# ── RECORDATORIO ─────────────────────────────────────────────────────────────
 
-class ProveedorBase(BaseModel):
-    empresa:         str
-    contacto_asesor: Optional[str] = None
-    telefono:        Optional[str] = None
-    suministro:      Optional[str] = None
-    estado_convenio: Optional[str] = "Vigente"
+class RecordatorioBase(BaseModel):
+    tipo: Optional[str] = None
+    fecha_envio: Optional[datetime] = None
+    estado: Optional[str] = None
+    id_cita: int
 
-class ProveedorCreate(ProveedorBase):
+class RecordatorioCreate(RecordatorioBase):
     pass
 
-class ProveedorOut(ProveedorBase):
-    id:        int
-    creado_en: Optional[datetime]
+class RecordatorioOut(RecordatorioBase):
+    id_recordatorio: int
+    class Config:
+        from_attributes = True
+
+
+# ── PAGO ─────────────────────────────────────────────────────────────────────
+
+class PagoBase(BaseModel):
+    fecha_pago: date
+    monto: Decimal
+    metodo_pago: Optional[str] = None
+    estado_pago: Optional[str] = None
+    referencia: Optional[str] = None
+    id_cita: int
+
+class PagoCreate(PagoBase):
+    pass
+
+class PagoOut(PagoBase):
+    id_pago: int
+    class Config:
+        from_attributes = True
+
+
+# ── FACTURA ──────────────────────────────────────────────────────────────────
+
+class FacturaBase(BaseModel):
+    fecha_emision: date
+    subtotal: Optional[Decimal] = None
+    impuesto: Optional[Decimal] = None
+    total: Optional[Decimal] = None
+    id_pago: int
+
+class FacturaCreate(FacturaBase):
+    pass
+
+class FacturaOut(FacturaBase):
+    id_factura: int
     class Config:
         from_attributes = True

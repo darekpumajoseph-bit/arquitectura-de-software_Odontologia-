@@ -1,134 +1,204 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Enum
+# models.py - Versión actualizada con correo
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Date, Time, Numeric, TIMESTAMP, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from database import Base
-import enum
+
+# ── TABLAS DE RELACIÓN MANY-TO-MANY ──────────────────────────────────────────
+
+usuario_paciente = Table(
+    "usuario_paciente",
+    Base.metadata,
+    Column("id_usuario", Integer, ForeignKey("usuario.id_usuario"), primary_key=True),
+    Column("id_paciente", Integer, ForeignKey("paciente.id_paciente"), primary_key=True),
+    extend_existing=True
+)
+
+usuario_tratamiento = Table(
+    "usuario_tratamiento",
+    Base.metadata,
+    Column("id_usuario", Integer, ForeignKey("usuario.id_usuario"), primary_key=True),
+    Column("id_tratamiento", Integer, ForeignKey("tratamiento.id_tratamiento"), primary_key=True),
+    extend_existing=True
+)
 
 
-# ── ENUMERACIONES ──────────────────────────────────────────────────────────────
-
-class RolEnum(str, enum.Enum):
-    administrador = "Administrador"
-    odontologo    = "Odontólogo"
-    paciente      = "Paciente"
-
-class EstadoCitaEnum(str, enum.Enum):
-    en_espera  = "En Espera"
-    en_proceso = "En Consulta"
-    finalizado = "Finalizado"
-
-class EstadoCuentaEnum(str, enum.Enum):
-    pendiente = "Saldo Pendiente"
-    pagado    = "Pagado"
-
-class EstadoConvenioEnum(str, enum.Enum):
-    vigente  = "Vigente"
-    vencido  = "Vencido"
-    suspendido = "Suspendido"
-
-
-# ── TABLA: ROLES ───────────────────────────────────────────────────────────────
-
-class Rol(Base):
-    __tablename__ = "roles"
-
-    id          = Column(Integer, primary_key=True, index=True)
-    nombre      = Column(String(50), unique=True, nullable=False)
-    descripcion = Column(Text, nullable=True)
-    permisos    = Column(String(100), nullable=True)   # Ej: "FULL ACCESS", "READ / UPDATE"
-
-    # Relación inversa
-    usuarios = relationship("Usuario", back_populates="rol")
-
-
-# ── TABLA: USUARIOS ────────────────────────────────────────────────────────────
+# ── TABLA: USUARIO ────────────────────────────────────────────────────────────
 
 class Usuario(Base):
-    __tablename__ = "usuarios"
+    __tablename__ = "usuario"
+    __table_args__ = {'extend_existing': True}
 
-    id             = Column(Integer, primary_key=True, index=True)
-    nombre         = Column(String(120), nullable=False)
-    correo         = Column(String(120), unique=True, nullable=False)
-    identificacion = Column(String(20),  unique=True, nullable=False)
-    password_hash  = Column(String(255), nullable=False)
-    estado         = Column(String(20), default="Activo")
-    rol_id         = Column(Integer, ForeignKey("roles.id"), nullable=False)
-    creado_en      = Column(DateTime(timezone=True), server_default=func.now())
+    id_usuario = Column(Integer, primary_key=True, index=True)
+    correo = Column(String(100), nullable=False, unique=True)  # <-- Cambiado de username a correo
+    contrasena = Column(String(255), nullable=False)
+    rol = Column(String(30), nullable=False)
+    estado = Column(String(20), nullable=False)
 
-    # Relaciones
-    rol       = relationship("Rol",      back_populates="usuarios")
-    citas_dr  = relationship("Cita",     back_populates="odontologo",
-                             foreign_keys="Cita.odontologo_id")
-    citas_pac = relationship("Cita",     back_populates="paciente",
-                             foreign_keys="Cita.paciente_id")
-    servicios = relationship("Servicio", back_populates="paciente")
+    pacientes = relationship("Paciente", secondary=usuario_paciente, back_populates="usuarios")
+    tratamientos = relationship("Tratamiento", secondary=usuario_tratamiento, back_populates="usuarios")
 
 
-# ── TABLA: TRATAMIENTOS ────────────────────────────────────────────────────────
+# ── TABLA: PACIENTE ────────────────────────────────────────────────────────────
 
-class Tratamiento(Base):
-    __tablename__ = "tratamientos"
+class Paciente(Base):
+    __tablename__ = "paciente"
+    __table_args__ = {'extend_existing': True}
 
-    id          = Column(Integer, primary_key=True, index=True)
-    nombre      = Column(String(120), unique=True, nullable=False)
-    descripcion = Column(Text, nullable=True)
-    precio_base = Column(Integer, default=0)       # En pesos colombianos
+    id_paciente = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    apellido = Column(String(100), nullable=False)
+    documento = Column(String(20), unique=True, nullable=False)
+    fecha_nacimiento = Column(Date, nullable=True)
+    genero = Column(String(20), nullable=True)
+    direccion = Column(String(200), nullable=True)
+    telefono = Column(String(20), nullable=True)
+    correo = Column(String(100), nullable=True)  # <-- Este es el correo del paciente
+    eps = Column(String(100), nullable=True)
+    alergias = Column(Text, nullable=True)
 
-    # Relación inversa
-    citas    = relationship("Cita",     back_populates="tratamiento")
-    servicios = relationship("Servicio", back_populates="tratamiento")
+    usuarios = relationship("Usuario", secondary=usuario_paciente, back_populates="pacientes")
+    historias = relationship("HistoriaClinica", back_populates="paciente")
+    citas = relationship("Cita", back_populates="paciente")
 
 
-# ── TABLA: CITAS ───────────────────────────────────────────────────────────────
+# ── TABLA: CONSULTORIO ────────────────────────────────────────────────────────
+
+class Consultorio(Base):
+    __tablename__ = "consultorio"
+    __table_args__ = {'extend_existing': True}
+
+    id_consultorio = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    ubicacion = Column(String(150), nullable=True)
+    numero_sala = Column(String(20), nullable=True)
+
+    odontologos = relationship("Odontologo", back_populates="consultorio")
+    citas = relationship("Cita", back_populates="consultorio")
+
+
+# ── TABLA: ODONTOLOGO ─────────────────────────────────────────────────────────
+
+class Odontologo(Base):
+    __tablename__ = "odontologo"
+    __table_args__ = {'extend_existing': True}
+
+    id_odontologo = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    apellido = Column(String(100), nullable=False)
+    documento = Column(String(20), unique=True, nullable=False)
+    telefono = Column(String(20), nullable=True)
+    correo = Column(String(100), nullable=True)
+    especialidad = Column(String(100), nullable=True)
+    registro_profesional = Column(String(50), nullable=True)
+    horario = Column(String(100), nullable=True)
+    id_consultorio = Column(Integer, ForeignKey("consultorio.id_consultorio"), nullable=False)
+
+    consultorio = relationship("Consultorio", back_populates="odontologos")
+    citas = relationship("Cita", back_populates="odontologo")
+
+
+# ── TABLA: HISTORIA CLINICA ──────────────────────────────────────────────────
+
+class HistoriaClinica(Base):
+    __tablename__ = "historia_clinica"
+    __table_args__ = {'extend_existing': True}
+
+    id_historia = Column(Integer, primary_key=True, index=True)
+    fecha_apertura = Column(Date, nullable=False)
+    antecedentes = Column(Text, nullable=True)
+    diagnostico_general = Column(Text, nullable=True)
+    observaciones = Column(Text, nullable=True)
+    id_paciente = Column(Integer, ForeignKey("paciente.id_paciente"), nullable=False)
+
+    paciente = relationship("Paciente", back_populates="historias")
+
+
+# ── TABLA: CITA ──────────────────────────────────────────────────────────────
 
 class Cita(Base):
-    __tablename__ = "citas"
+    __tablename__ = "cita"
+    __table_args__ = {'extend_existing': True}
 
-    id             = Column(Integer, primary_key=True, index=True)
-    paciente_id    = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
-    odontologo_id  = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
-    tratamiento_id = Column(Integer, ForeignKey("tratamientos.id"), nullable=True)
-    fecha_hora     = Column(String(50), nullable=False)   # ISO 8601 como string
-    estado         = Column(String(30), default=EstadoCitaEnum.en_espera)
-    notas          = Column(Text, nullable=True)
-    creado_en      = Column(DateTime(timezone=True), server_default=func.now())
+    id_cita = Column(Integer, primary_key=True, index=True)
+    fecha = Column(Date, nullable=False)
+    hora = Column(Time, nullable=False)
+    estado = Column(String(30), nullable=True)
+    motivo_consulta = Column(Text, nullable=True)
+    observaciones = Column(Text, nullable=True)
+    id_paciente = Column(Integer, ForeignKey("paciente.id_paciente"), nullable=False)
+    id_odontologo = Column(Integer, ForeignKey("odontologo.id_odontologo"), nullable=False)
+    id_consultorio = Column(Integer, ForeignKey("consultorio.id_consultorio"), nullable=False)
 
-    # Relaciones
-    paciente    = relationship("Usuario",     back_populates="citas_pac",
-                               foreign_keys=[paciente_id])
-    odontologo  = relationship("Usuario",     back_populates="citas_dr",
-                               foreign_keys=[odontologo_id])
-    tratamiento = relationship("Tratamiento", back_populates="citas")
-
-
-# ── TABLA: SERVICIOS ADQUIRIDOS (historial del paciente) ───────────────────────
-
-class Servicio(Base):
-    __tablename__ = "servicios"
-
-    id              = Column(Integer, primary_key=True, index=True)
-    paciente_id     = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
-    tratamiento_id  = Column(Integer, ForeignKey("tratamientos.id"), nullable=False)
-    odontologo_id   = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
-    proxima_cita    = Column(String(80), nullable=True)
-    estado_cuenta   = Column(String(30), default=EstadoCuentaEnum.pendiente)
-    creado_en       = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relaciones
-    paciente    = relationship("Usuario",     back_populates="servicios",
-                               foreign_keys=[paciente_id])
-    tratamiento = relationship("Tratamiento", back_populates="servicios")
+    paciente = relationship("Paciente", back_populates="citas")
+    odontologo = relationship("Odontologo", back_populates="citas")
+    consultorio = relationship("Consultorio", back_populates="citas")
+    tratamientos = relationship("Tratamiento", back_populates="cita")
+    recordatorios = relationship("Recordatorio", back_populates="cita")
+    pagos = relationship("Pago", back_populates="cita")
 
 
-# ── TABLA: PROVEEDORES ─────────────────────────────────────────────────────────
+# ── TABLA: TRATAMIENTO ────────────────────────────────────────────────────────
 
-class Proveedor(Base):
-    __tablename__ = "proveedores"
+class Tratamiento(Base):
+    __tablename__ = "tratamiento"
+    __table_args__ = {'extend_existing': True}
 
-    id               = Column(Integer, primary_key=True, index=True)
-    empresa          = Column(String(150), nullable=False)
-    contacto_asesor  = Column(String(120), nullable=True)
-    telefono         = Column(String(30),  nullable=True)
-    suministro       = Column(String(200), nullable=True)
-    estado_convenio  = Column(String(30),  default=EstadoConvenioEnum.vigente)
-    creado_en        = Column(DateTime(timezone=True), server_default=func.now())
+    id_tratamiento = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    descripcion = Column(Text, nullable=True)
+    costo = Column(Numeric(10, 2), nullable=True)
+    duracion_estimada = Column(String(100), nullable=True)
+    id_cita = Column(Integer, ForeignKey("cita.id_cita"), nullable=False)
+
+    cita = relationship("Cita", back_populates="tratamientos")
+    usuarios = relationship("Usuario", secondary=usuario_tratamiento, back_populates="tratamientos")
+
+
+# ── TABLA: RECORDATORIO ──────────────────────────────────────────────────────
+
+class Recordatorio(Base):
+    __tablename__ = "recordatorio"
+    __table_args__ = {'extend_existing': True}
+
+    id_recordatorio = Column(Integer, primary_key=True, index=True)
+    tipo = Column(String(50), nullable=True)
+    fecha_envio = Column(TIMESTAMP, nullable=True)
+    estado = Column(String(30), nullable=True)
+    id_cita = Column(Integer, ForeignKey("cita.id_cita"), nullable=False)
+
+    cita = relationship("Cita", back_populates="recordatorios")
+
+
+# ── TABLA: PAGO ──────────────────────────────────────────────────────────────
+
+class Pago(Base):
+    __tablename__ = "pago"
+    __table_args__ = {'extend_existing': True}
+
+    id_pago = Column(Integer, primary_key=True, index=True)
+    fecha_pago = Column(Date, nullable=False)
+    monto = Column(Numeric(10, 2), nullable=False)
+    metodo_pago = Column(String(50), nullable=True)
+    estado_pago = Column(String(30), nullable=True)
+    referencia = Column(String(100), nullable=True)
+    id_cita = Column(Integer, ForeignKey("cita.id_cita"), nullable=False)
+
+    cita = relationship("Cita", back_populates="pagos")
+    factura = relationship("Factura", back_populates="pago", uselist=False)
+
+
+# ── TABLA: FACTURA ───────────────────────────────────────────────────────────
+
+class Factura(Base):
+    __tablename__ = "factura"
+    __table_args__ = {'extend_existing': True}
+
+    id_factura = Column(Integer, primary_key=True, index=True)
+    fecha_emision = Column(Date, nullable=False)
+    subtotal = Column(Numeric(10, 2), nullable=True)
+    impuesto = Column(Numeric(10, 2), nullable=True)
+    total = Column(Numeric(10, 2), nullable=True)
+    id_pago = Column(Integer, ForeignKey("pago.id_pago"), unique=True, nullable=False)
+
+    pago = relationship("Pago", back_populates="factura")
