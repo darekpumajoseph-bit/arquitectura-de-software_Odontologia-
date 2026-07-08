@@ -2,7 +2,7 @@
 
 ![HTML5](https://img.shields.io/badge/HTML5-Semántico-orange) ![CSS3](https://img.shields.io/badge/CSS3-Responsive-blue) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
 
-Interfaz web moderna y responsiva para OdontoSoft. Comunicación centralizada con API REST mediante Fetch API.
+Interfaz web moderna, responsiva y dinámica. Comunicación centralizada con backend mediante Fetch API.
 
 ---
 
@@ -10,66 +10,45 @@ Interfaz web moderna y responsiva para OdontoSoft. Comunicación centralizada co
 
 ```
 frontend/
-├── html/                        # Vistas
-│   ├── index.html               # Landing page
-│   ├── login.html               # Autenticación
-│   ├── registro.html            # Registro de usuarios
-│   ├── panel.html               # Dashboard administrador
-│   ├── panel_cliente.html       # Autogestión pacientes
-│   ├── citas.html               # Agendamiento
-│   ├── pacientes.html           # Directorio pacientes
-│   ├── odontologos.html         # Directorio odontólogos
-│   ├── tratamientos.html        # Catálogo servicios
-│   ├── roles.html               # Gestión de permisos
-│   ├── proveedores.html         # Convenios
-│   ├── contacto.html            # Soporte
-│   └── politicas/               # Legal
-│       ├── politica-privacidad.html
-│       ├── proteccion-datos.html
-│       └── uso-sistema.html
+├── html/                    # Vistas
+│   ├── index.html          # Landing page
+│   ├── login.html          # Autenticación
+│   ├── registro.html       # Registro
+│   ├── panel.html          # Dashboard principal
+│   ├── citas.html          # Agenda
+│   ├── pacientes.html      # Pacientes CRUD
+│   ├── odontologos.html    # Odontólogos
+│   ├── tratamientos.html   # Catálogo
+│   ├── pagos.html          # Finanzas
+│   └── roles.html          # Control de acceso
 │
-├── css/                         # Estilos
-│   ├── style.css                # Estilos principales (dashboard, modales, tablas)
-│   ├── auth.css                 # Login/registro responsive
-│   └── politicas.css            # Documentos legales
+├── css/                     # Estilos
+│   ├── style.css           # Estilos principales
+│   ├── auth.css            # Login/registro
+│   └── politicas.css       # Documentos legales
 │
-└── js/                          # Lógica JavaScript
-    ├── api.js                   # Cliente HTTP centralizado → Fetch API
-    └── auth.js                  # Validación formularios
+└── js/                      # Lógica
+    ├── api.js              # Cliente HTTP centralizado
+    └── auth.js             # Validación formularios
 ```
 
 ---
 
-## 🎨 Diseño & Componentes
+## 🎨 Componentes
 
-### Características UI
-- ✅ **Layout responsivo** — Grid + Flexbox
-- ✅ **Dashboard moderno** — Menú lateral, contenido dinámico
-- ✅ **Modales nativos** — Creación/edición de registros
-- ✅ **Tablas dinámicas** — Datos desde BD en tiempo real
-- ✅ **Toast notifications** — Alertas flotantes (éxito/error)
-- ✅ **Iconos Material** — Material Symbols Outlined
-- ✅ **Tipografía Poppins** — Limpia y profesional
-
-### CSS - Variables Globales
-```css
-:root {
-    --primary-color: #2196F3;        /* Azul */
-    --secondary-color: #FF9800;      /* Naranja */
-    --success-color: #4CAF50;        /* Verde */
-    --danger-color: #F44336;         /* Rojo */
-    --dark-bg: #1a1a1a;
-    --light-bg: #f5f5f5;
-    --text-dark: #333;
-    --text-light: #666;
-}
-```
+- ✅ **Dashboard responsivo** — Menú lateral + contenido dinámico
+- ✅ **Modales nativos** — Crear/editar registros
+- ✅ **Tablas dinámicas** — Datos en tiempo real desde BD
+- ✅ **Toast notifications** — Alertas flotantes (éxito/error/warning)
+- ✅ **Formularios validados** — Email, contraseña, campos requeridos
+- ✅ **Iconos Material Symbols** — UI moderna
+- ✅ **CSS responsivo** — Mobile, tablet, desktop
 
 ---
 
-## 🔌 API Integration (js/api.js)
+## 🔌 API Integration (api.js)
 
-**Centraliza todos los requests HTTP hacia el backend:**
+Centraliza todos los requests HTTP:
 
 ```javascript
 const API_BASE = "http://127.0.0.1:8000";
@@ -84,19 +63,9 @@ async function registroUsuario(datos) {
     return resp.json();
 }
 
-async function loginUsuario(correo, contrasena) {
-    const resp = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, contrasena })
-    });
-    return resp.json();
-}
-
 // CRUD Genérico
 async function obtenerDatos(endpoint) {
-    const resp = await fetch(`${API_BASE}/${endpoint}`);
-    return resp.json();
+    return (await fetch(`${API_BASE}/${endpoint}`)).json();
 }
 
 async function crearDato(endpoint, datos) {
@@ -118,10 +87,7 @@ async function actualizarDato(endpoint, id, datos) {
 }
 
 async function eliminarDato(endpoint, id) {
-    const resp = await fetch(`${API_BASE}/${endpoint}/${id}`, {
-        method: "DELETE"
-    });
-    return resp.status === 204;
+    await fetch(`${API_BASE}/${endpoint}/${id}`, { method: "DELETE" });
 }
 ```
 
@@ -129,146 +95,30 @@ async function eliminarDato(endpoint, id) {
 
 ## 📄 Vistas Principales
 
-### index.html
-- Landing page informativa
-- Introducción a OdontoSoft
-- Botones de login/registro
-
-### login.html
-```html
-<!-- Formulario login -->
-<form id="loginForm">
-    <input type="email" id="correo" placeholder="Correo" required>
-    <input type="password" id="contrasena" placeholder="Contraseña" required>
-    <button type="submit">Iniciar Sesión</button>
-    <a href="registro.html">¿No tienes cuenta? Regístrate</a>
-</form>
-
-<script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const correo = document.getElementById('correo').value;
-    const contrasena = document.getElementById('contrasena').value;
-    
-    try {
-        const respuesta = await loginUsuario(correo, contrasena);
-        if (respuesta.id_usuario) {
-            localStorage.setItem('usuario', JSON.stringify(respuesta));
-            mostrarToast('✅ Inicio de sesión exitoso', 'success');
-            window.location.href = 'panel.html';
-        } else {
-            mostrarToast('❌ Credenciales inválidas', 'error');
-        }
-    } catch (error) {
-        mostrarToast('❌ Error al iniciar sesión', 'error');
-    }
-});
-</script>
-```
-
-### registro.html
-- Formulario de registro (Paciente/Odontólogo)
-- Validación de campos
-- Cifrado de contraseña antes de enviar
-
-### panel.html (Dashboard)
-```html
-<!-- Menú lateral -->
-<aside class="sidebar">
-    <nav>
-        <a href="#" onclick="mostrarSeccion('usuarios')">👥 Usuarios</a>
-        <a href="#" onclick="mostrarSeccion('pacientes')">🦷 Pacientes</a>
-        <a href="#" onclick="mostrarSeccion('citas')">📅 Citas</a>
-        <a href="#" onclick="mostrarSeccion('tratamientos')">💊 Tratamientos</a>
-        <a href="#" onclick="mostrarSeccion('pagos')">💰 Pagos</a>
-    </nav>
-</aside>
-
-<!-- Contenido dinámico -->
-<main class="contenido" id="contenido">
-    <!-- Se llena con JavaScript según sección seleccionada -->
-</main>
-
-<script>
-async function mostrarSeccion(seccion) {
-    let endpoint = '';
-    let titulo = '';
-    
-    if (seccion === 'pacientes') {
-        endpoint = 'pacientes';
-        titulo = '🦷 Pacientes';
-    } else if (seccion === 'citas') {
-        endpoint = 'citas';
-        titulo = '📅 Citas';
-    }
-    // ... más secciones
-    
-    const datos = await obtenerDatos(endpoint);
-    renderizarTabla(titulo, datos, endpoint);
-}
-
-function renderizarTabla(titulo, datos, endpoint) {
-    let html = `<h2>${titulo}</h2>`;
-    html += '<table class="tabla"><thead><tr>';
-    
-    // Encabezados dinámicos
-    if (datos.length > 0) {
-        Object.keys(datos[0]).forEach(col => {
-            html += `<th>${col}</th>`;
-        });
-        html += '<th>Acciones</th></tr></thead><tbody>';
-        
-        // Filas de datos
-        datos.forEach(fila => {
-            html += '<tr>';
-            Object.values(fila).forEach(val => {
-                html += `<td>${val}</td>`;
-            });
-            html += `
-                <td>
-                    <button onclick="editarItem(${fila.id}, '${endpoint}')">✏️ Editar</button>
-                    <button onclick="eliminarItem(${fila.id}, '${endpoint}')">🗑️ Eliminar</button>
-                </td>
-            </tr>`;
-        });
-        html += '</tbody></table>';
-    }
-    
-    document.getElementById('contenido').innerHTML = html;
-}
-</script>
-```
-
-### citas.html
-- Calendario/agenda
-- Agendamiento de citas
-- Filtros por paciente/odontólogo
-- Estado de citas (Pendiente, Confirmada, Completada)
-
-### pacientes.html
-- Listado con búsqueda
-- CRUD completo
-- Modal para crear/editar
-- Campos: nombre, documento, EPS, alergias
+| Vista | Contenido |
+|-------|----------|
+| **index.html** | Landing page inicial |
+| **login.html** | Autenticación (correo + contraseña) |
+| **registro.html** | Registro (Paciente/Odontólogo) |
+| **panel.html** | Dashboard con menú lateral |
+| **pacientes.html** | CRUD pacientes (tabla + modal) |
+| **citas.html** | Agenda de citas |
+| **tratamientos.html** | Catálogo de servicios |
+| **pagos.html** | Gestión de pagos y facturas |
+| **roles.html** | Control de permisos |
 
 ---
 
-## 💬 Toast Notifications
-
-Sistema de alertas flotantes:
+## 💬 Sistema de Notificaciones
 
 ```javascript
 function mostrarToast(mensaje, tipo = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${tipo}`;
     toast.textContent = mensaje;
-    
     document.body.appendChild(toast);
     
-    setTimeout(() => {
-        toast.classList.add('mostrar');
-    }, 100);
-    
+    setTimeout(() => toast.classList.add('mostrar'), 100);
     setTimeout(() => {
         toast.classList.remove('mostrar');
         setTimeout(() => toast.remove(), 300);
@@ -276,9 +126,9 @@ function mostrarToast(mensaje, tipo = 'info') {
 }
 
 // Uso
-mostrarToast('✅ Usuario registrado exitosamente', 'success');
-mostrarToast('❌ Error al guardar datos', 'error');
-mostrarToast('⚠️ Campo requerido', 'warning');
+mostrarToast('✅ Guardado exitosamente', 'success');
+mostrarToast('❌ Error al guardar', 'error');
+mostrarToast('⚠️ Advertencia', 'warning');
 ```
 
 ---
@@ -286,32 +136,28 @@ mostrarToast('⚠️ Campo requerido', 'warning');
 ## 🔐 Autenticación en Frontend
 
 ```javascript
-// Guardar usuario en localStorage
+// Guardar usuario en localStorage (login exitoso)
 localStorage.setItem('usuario', JSON.stringify({
     id_usuario: 1,
     correo: 'usuario@mail.com',
-    rol: 'Paciente',
-    estado: 'Activo'
+    rol: 'Paciente'
 }));
 
 // Recuperar usuario
 const usuario = JSON.parse(localStorage.getItem('usuario'));
 
-// Logout
-function logout() {
-    localStorage.removeItem('usuario');
-    window.location.href = 'login.html';
-}
-
-// Validar sesión
+// Validar sesión (ejecutar en cada página protegida)
 function validarSesion() {
     if (!localStorage.getItem('usuario')) {
         window.location.href = 'login.html';
     }
 }
 
-// Ejecutar en cada página protegida
-validarSesion();
+// Logout
+function logout() {
+    localStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+}
 ```
 
 ---
@@ -320,187 +166,106 @@ validarSesion();
 
 ### Opción 1: Live Server (VS Code) ⭐ RECOMENDADO
 ```bash
-# Abre carpeta frontend en VS Code
-code .
+# Abre carpeta en VS Code
+code frontend
 
 # Instala extensión "Live Server" (Ritwick Dey)
 # Clic derecho en login.html → "Open with Live Server"
-# Se abre en http://127.0.0.1:5500 automáticamente
+# Se abre automáticamente en http://127.0.0.1:5500
 ```
 
 ### Opción 2: Servidor Python
 ```bash
 cd frontend
 python -m http.server 5500
-# Luego: http://localhost:5500/login.html
-```
-
-### Opción 3: Live.js (sin herramientas)
-```html
-<!-- En el <head> de cada archivo -->
-<script type="module" src="js/api.js"></script>
-<!-- Los cambios se reflejan automáticamente -->
+# Abre: http://localhost:5500/login.html
 ```
 
 ---
 
-## ⚠️ CORS & SEGURIDAD
+## ⚠️ CORS & Problemas Comunes
 
-### Problema: CORS error
-```
-Access to XMLHttpRequest at 'http://localhost:8000/...' 
-from origin 'http://localhost:5500' has been blocked by CORS policy
-```
+### Error: "CORS policy blocked"
+**Causa:** Abrir archivo con doble clic (file://)  
+**Solución:** Usar Live Server o servidor HTTP local
 
-### Soluciones:
-1. ✅ Backend debe tener CORS configurado (ver `main.py`)
-2. ✅ NO abrir archivos con doble clic (file://)
-3. ✅ SÍ usar servidor local (Live Server o Python)
+### Error: "Cannot GET /login.html"
+**Causa:** Backend no está corriendo  
+**Solución:** `uvicorn main:app --reload` en carpeta backend
 
-### Headers esperados en requests
+### Verificar conexión
 ```javascript
-fetch(URL, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-        // ⚠️ NO agregar 'Authorization' sin JWT
-    },
-    body: JSON.stringify(datos)
-})
+// En consola (F12)
+fetch('http://localhost:8000/health')
+    .then(r => r.json())
+    .then(d => console.log(d))
+    .catch(e => console.error('Backend no disponible'))
 ```
 
 ---
 
 ## 📱 Responsividad
 
-### Breakpoints CSS
 ```css
-/* Desktop */
+/* Desktop (1024px+) */
 @media (min-width: 1024px) {
     .sidebar { width: 250px; }
     .contenido { margin-left: 250px; }
 }
 
-/* Tablet */
+/* Tablet (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
     .sidebar { width: 200px; }
 }
 
-/* Mobile */
+/* Mobile (menos de 768px) */
 @media (max-width: 767px) {
     .sidebar { position: fixed; transform: translateX(-100%); }
-    .menu-toggle { display: block; }
 }
 ```
 
 ---
 
-## 🎯 Flujo Típico de Usuario
-
-```
-1. index.html (Landing) 
-   ↓
-2. login.html (Autenticación)
-   ↓ Credenciales válidas
-   ↓
-3. panel.html (Dashboard principal)
-   ├─ Pacientes (CRUD)
-   ├─ Citas (Agenda)
-   ├─ Tratamientos (Catálogo)
-   ├─ Pagos (Finanzas)
-   └─ Roles (Administración)
-   ↓
-4. logout (localStorage.removeItem + redirect login.html)
-```
-
----
-
-## 🛠️ Validación de Formularios
+## 🛠️ Tabla Dinámica (Componente Reutilizable)
 
 ```javascript
-// auth.js
-function validarEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-}
-
-function validarContrasena(pwd) {
-    return pwd.length >= 6;
-}
-
-function validarFormulario(formData) {
-    if (!validarEmail(formData.correo)) {
-        mostrarToast('❌ Email inválido', 'error');
-        return false;
-    }
-    if (!validarContrasena(formData.contrasena)) {
-        mostrarToast('❌ Contraseña mínimo 6 caracteres', 'error');
-        return false;
-    }
-    return true;
-}
-```
-
----
-
-## 📊 Componentes Reutilizables
-
-### Modal Genérico
-```html
-<div id="miModal" class="modal">
-    <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModal()">&times;</span>
-        <h2>Crear Paciente</h2>
-        <form id="formulario">
-            <input type="text" name="nombre" required>
-            <button type="submit">Guardar</button>
-        </form>
-    </div>
-</div>
-
-<script>
-function abrirModal() {
-    document.getElementById('miModal').style.display = 'block';
-}
-function cerrarModal() {
-    document.getElementById('miModal').style.display = 'none';
-}
-</script>
-```
-
-### Tabla Dinámica
-```javascript
-function crearTabla(datos, columnas) {
-    let html = '<table class="tabla"><thead><tr>';
-    columnas.forEach(col => {
+function renderizarTabla(titulo, datos, endpoint) {
+    let html = `<h2>${titulo}</h2><table class="tabla"><thead><tr>`;
+    
+    // Encabezados
+    Object.keys(datos[0] || {}).forEach(col => {
         html += `<th>${col}</th>`;
     });
-    html += '</tr></thead><tbody>';
+    html += '<th>Acciones</th></tr></thead><tbody>';
     
+    // Filas
     datos.forEach(fila => {
         html += '<tr>';
-        columnas.forEach(col => {
-            html += `<td>${fila[col]}</td>`;
-        });
-        html += '</tr>';
+        Object.values(fila).forEach(val => html += `<td>${val}</td>`);
+        html += `
+            <td>
+                <button onclick="editarItem(${fila.id}, '${endpoint}')">✏️</button>
+                <button onclick="eliminarItem(${fila.id}, '${endpoint}')">🗑️</button>
+            </td>
+        </tr>`;
     });
     
     html += '</tbody></table>';
-    return html;
+    document.getElementById('contenido').innerHTML = html;
 }
 ```
 
 ---
 
-## 🔍 Debugging en Navegador
+## 🔍 Debugging
 
 ```javascript
-// Console
-console.log('Datos:', datos);
+// Console (F12)
+console.log('Debug:', datos);
 console.error('Error:', error);
 
-// Network tab (F12)
-// Verifica requests/responses HTTP
+// Network tab
+// Ver requests/responses HTTP en tiempo real
 
 // Local Storage
 localStorage.getItem('usuario')
@@ -510,33 +275,69 @@ localStorage.clear()
 
 ---
 
+## 📋 Validación de Formularios
+
+```javascript
+// auth.js
+function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validarContrasena(pwd) {
+    return pwd.length >= 6;
+}
+
+// Uso
+if (!validarEmail(correo)) {
+    mostrarToast('❌ Email inválido', 'error');
+}
+```
+
+---
+
+## 🎯 Flujo Típico
+
+```
+index.html (Landing)
+    ↓
+login.html (Autenticación)
+    ↓ Credenciales válidas
+    ↓
+panel.html (Dashboard)
+    ├─ pacientes.html (CRUD)
+    ├─ citas.html (Agenda)
+    ├─ tratamientos.html (Catálogo)
+    ├─ pagos.html (Finanzas)
+    └─ roles.html (Permisos)
+    ↓
+logout (Volver a login.html)
+```
+
+---
+
 ## 📈 Mejoras Futuras
 
 - 🔐 JWT tokens en lugar de localStorage
 - ⚡ Lazy loading de módulos
-- 🎨 Theme oscuro/claro
-- 📊 Gráficos con Chart.js
+- 🎨 Tema oscuro/claro
+- 📊 Gráficos (Chart.js)
 - 🔔 WebSockets para notificaciones real-time
 - 📱 PWA (Progressive Web App)
-- ♿ Mejoras accesibilidad (WCAG)
 
 ---
 
-## 📞 Soporte
+## 📞 URLs Importantes
 
-**Si hay errores en consola (F12):**
-1. Verifica que Backend esté corriendo en http://localhost:8000
-2. Revisa Network tab para ver requests fallidos
-3. Comprueba que `api.js` apunta a URL correcta
-4. Abre DevTools: F12 → Console → busca errores
-
-**URLs importantes:**
-- Frontend: http://localhost:5500/login.html
-- Backend: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+| Servicio | URL |
+|----------|-----|
+| **Frontend** | http://localhost:5500/login.html |
+| **Backend** | http://localhost:8000 |
+| **API Docs** | http://localhost:8000/docs |
+| **Health Check** | http://localhost:8000/health |
 
 ---
 
-**Versión:** 2.0.0 | **Stack:** HTML5 + CSS3 + JavaScript ES6+ | **Comunicación:** Fetch API
+**Versión:** 2.0.0 | **Stack:** HTML5 + CSS3 + JavaScript ES6+ | **API:** Fetch API
 
-Para detalles del backend, consulta `readme, bckend.md`
+Para detalles del backend, consulta `readme, bckend.md`  
+Para guía general, consulta `README.md`
