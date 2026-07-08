@@ -1,173 +1,119 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>OdontoSoft - Tratamientos</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link href="../css/style.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+    <link href="../css/tratamientos.css" rel="stylesheet"/>
 </head>
 <body>
+    <div class="toast" id="toast"></div>
 
-<div id="toast" class="toast"></div>
-
-<!-- Modal -->
-<div id="modalTrat" class="modal-overlay">
-    <div class="modal">
-        <h3 id="modalTitulo">Nuevo Tratamiento</h3>
-        <input type="hidden" id="editId">
-        <div class="form-group">
-            <label>Nombre del Tratamiento</label>
-            <input type="text" id="inNombre" placeholder="Ej. Limpieza Dental">
-        </div>
-        <div class="form-group">
-            <label>Descripción</label>
-            <textarea id="inDescripcion" rows="3" placeholder="Descripción del procedimiento..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>Precio Base (COP $)</label>
-            <input type="number" id="inPrecio" placeholder="150000" min="0">
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-primary" onclick="guardarTratamiento()">
-                <span class="material-symbols-outlined">save</span> Guardar
-            </button>
+    <!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR TRATAMIENTO -->
+    <div id="confirmModal" class="confirm-overlay">
+        <div class="confirm-modal">
+            <span class="material-symbols-outlined confirm-icon warning" id="confirmIcon">warning</span>
+            <h3 id="confirmTitulo">¿Eliminar este tratamiento?</h3>
+            <p id="confirmMensaje">Esta acción no se puede deshacer. El tratamiento será eliminado permanentemente del sistema.</p>
+            <div class="tratamiento-info" id="tratamientoInfo">
+                <strong>Nombre:</strong> <span id="confirmNombre" class="nombre-tratamiento">—</span><br>
+                <strong>Precio:</strong> <span id="confirmPrecio" class="info-text">—</span>
+            </div>
+            <div class="confirm-footer" id="confirmFooter">
+                <button class="btn-confirm-cancelar" onclick="cerrarConfirmModal()">
+                    <span class="material-symbols-outlined">close</span> Cancelar
+                </button>
+                <button class="btn-confirm-eliminar" id="btnConfirmEliminar" onclick="confirmarEliminar()">
+                    <span class="material-symbols-outlined">delete</span> Eliminar
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="dashboard-container">
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="material-symbols-outlined">dentistry</span>
-            <span>OdontoSoft</span>
+    <!-- MODAL TRATAMIENTO -->
+    <div class="modal-overlay" id="modalTrat">
+        <div class="modal">
+            <h3>
+                <span class="material-symbols-outlined">medical_services</span>
+                <span id="modalTitulo">Nuevo Tratamiento</span>
+            </h3>
+            <input id="editId" type="hidden"/>
+
+            <div class="form-group">
+                <label>Nombre del Tratamiento <span class="required">*</span></label>
+                <input id="inNombre" placeholder="Ej. Limpieza Dental" type="text"/>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="inDescripcion" placeholder="Descripción del procedimiento..." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Precio Base (COP $) <span class="required">*</span></label>
+                <input id="inPrecio" min="0" placeholder="150000" type="number"/>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-guardar" id="btnGuardarTratamiento">
+                    <span class="material-symbols-outlined">save</span> Guardar
+                </button>
+            </div>
         </div>
-        <nav class="sidebar-menu">
-            <a href="panel.html"><span class="material-symbols-outlined">group</span> Usuarios</a>
-            <a href="roles.html"><span class="material-symbols-outlined">manage_accounts</span> Roles</a>
-            <a href="tratamientos.html" class="active"><span class="material-symbols-outlined">medical_services</span> Tratamientos</a>
-            <a href="citas.html"><span class="material-symbols-outlined">calendar_month</span> Citas</a>
-            <a href="proveedores.html"><span class="material-symbols-outlined">local_shipping</span> Proveedores</a>
-            <a href="panel_cliente.html"><span class="material-symbols-outlined">account_circle</span> Paciente</a>
-            <a href="login.html" onclick="localStorage.removeItem('usuario_actual')"><span class="material-symbols-outlined">logout</span> Salir</a>
-        </nav>
-    </aside>
+    </div>
 
-    <main class="main-content">
-        <header class="content-header">
-            <h2>Catálogo de Tratamientos</h2>
-            <button class="btn-primary" onclick="abrirModal()">
-                <span class="material-symbols-outlined">add</span> Nuevo Tratamiento
-            </button>
-        </header>
+    <!-- DASHBOARD -->
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="material-symbols-outlined">dentistry</span>
+                <span>OdontoSoft</span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="panel.html"><span class="material-symbols-outlined">group</span> Usuarios</a>
+                <a href="roles.html"><span class="material-symbols-outlined">manage_accounts</span> Roles</a>
+                <a class="active" href="tratamientos.html"><span class="material-symbols-outlined">medical_services</span> Tratamientos</a>
+                <a href="citas.html"><span class="material-symbols-outlined">calendar_month</span> Citas</a>
+                <a href="proveedores.html"><span class="material-symbols-outlined">local_shipping</span> Proveedores</a>
+                <a href="../login.html" onclick="localStorage.removeItem('usuario_actual')"><span class="material-symbols-outlined">logout</span> Salir</a>
+            </nav>
+        </aside>
 
-        <section class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio Base</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaTratamientos">
-                    <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-</div>
+        <main class="main-content">
+            <header class="content-header">
+                <div>
+                    <h2>Catálogo de Tratamientos</h2>
+                    <p style="color:var(--text-muted)">Gestión de tratamientos odontológicos</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModal()">
+                    <span class="material-symbols-outlined">add</span> Nuevo Tratamiento
+                </button>
+            </header>
 
-<script>
-    const API = "http://127.0.0.1:8000";
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio Base</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTratamientos">
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 
-    function toast(msg, tipo = "success") {
-        const t = document.getElementById("toast");
-        t.textContent = msg; t.className = `toast show ${tipo}`;
-        setTimeout(() => t.classList.remove("show"), 3000);
-    }
-
-    async function api(method, path, body = null) {
-        const res = await fetch(`${API}${path}`, {
-            method, headers: { "Content-Type": "application/json" },
-            body: body ? JSON.stringify(body) : null
-        });
-        if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Error"); }
-        return res.json();
-    }
-
-    async function cargarTratamientos() {
-        try {
-            const lista = await api("GET", "/tratamientos");
-            const tbody = document.getElementById("tablaTratamientos");
-            if (!lista.length) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Sin tratamientos registrados</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = lista.map(t => `
-                <tr>
-                    <td>${t.id_tratamiento}</td>
-                    <td><strong>${t.nombre}</strong></td>
-                    <td>${t.descripcion || '—'}</td>
-                    <td>$${(t.costo || 0).toLocaleString('es-CO')}</td>
-                    <td>
-                        <button class="btn-icon" onclick="editarTratamiento(${t.id_tratamiento})"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="btn-danger" onclick="eliminarTratamiento(${t.id_tratamiento})"><span class="material-symbols-outlined">delete</span></button>
-                    </td>
-                </tr>
-            `).join("");
-        } catch { toast("No se pudo conectar con la API", "error"); }
-    }
-
-    function abrirModal() {
-        document.getElementById("editId").value = "";
-        document.getElementById("modalTitulo").textContent = "Nuevo Tratamiento";
-        document.getElementById("inNombre").value = "";
-        document.getElementById("inDescripcion").value = "";
-        document.getElementById("inPrecio").value = "";
-        document.getElementById("modalTrat").classList.add("open");
-    }
-
-    function cerrarModal() { document.getElementById("modalTrat").classList.remove("open"); }
-
-    async function editarTratamiento(id) {
-        const t = await api("GET", `/tratamientos/${id}`);
-        document.getElementById("editId").value = t.id_tratamiento;
-        document.getElementById("modalTitulo").textContent = "Editar Tratamiento";
-        document.getElementById("inNombre").value = t.nombre;
-        document.getElementById("inDescripcion").value = t.descripcion || "";
-        document.getElementById("inPrecio").value = t.costo || 0;
-        document.getElementById("modalTrat").classList.add("open");
-    }
-
-    async function guardarTratamiento() {
-        const id = document.getElementById("editId").value;
-        const data = {
-            nombre: document.getElementById("inNombre").value,
-            descripcion: document.getElementById("inDescripcion").value,
-            costo: parseFloat(document.getElementById("inPrecio").value) || 0,
-            id_cita: 1 // Temporal - debería seleccionarse una cita
-        };
-        try {
-            if (id) { await api("PUT", `/tratamientos/${id}`, data); toast("Tratamiento actualizado"); }
-            else { await api("POST", "/tratamientos", data); toast("Tratamiento creado"); }
-            cerrarModal(); cargarTratamientos();
-        } catch(e) { toast(e.message, "error"); }
-    }
-
-    async function eliminarTratamiento(id) {
-        if (!confirm("¿Eliminar este tratamiento?")) return;
-        try { await api("DELETE", `/tratamientos/${id}`); toast("Tratamiento eliminado"); cargarTratamientos(); }
-        catch(e) { toast(e.message, "error"); }
-    }
-
-    const usuarioActual = JSON.parse(localStorage.getItem('usuario_actual') || 'null');
-    if (!usuarioActual) { window.location.href = "login.html"; }
-
-    cargarTratamientos();
-</script>
+    <script src="../js/tratamientos.js"></script>
 </body>
 </html>

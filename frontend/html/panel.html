@@ -1,1115 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>OdontoSoft - Usuarios</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
-    <style>
-        /* ============================================
-           MODAL DE CONFIRMACIÓN - ESTILO MODERNO
-           ============================================ */
-        .confirm-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(8px);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            animation: fadeInOverlay 0.3s ease;
-        }
-        .confirm-overlay.open { display: flex; }
-        
-        @keyframes fadeInOverlay {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .confirm-modal {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 40px 38px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            animation: modalSlideIn 0.3s ease;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .confirm-modal:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
-        }
-        
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        
-        .confirm-modal .confirm-icon {
-            font-size: 3.5rem;
-            margin-bottom: 16px;
-            display: block;
-        }
-        .confirm-modal .confirm-icon.warning { color: #ef4444; }
-        .confirm-modal .confirm-icon.error { color: #ef4444; }
-        .confirm-modal .confirm-icon.success { color: #22c55e; }
-        
-        .confirm-modal h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 10px;
-        }
-        .confirm-modal p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-        .confirm-modal .user-info {
-            background: #f8fafc;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 1px solid #e2e8f0;
-        }
-        .confirm-modal .user-info strong {
-            color: var(--text-main);
-            font-weight: 700;
-        }
-        .confirm-modal .user-info .correo {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        .confirm-modal .confirm-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-        .confirm-modal .confirm-footer button {
-            padding: 11px 28px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        .btn-confirm-cancelar {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-        .btn-confirm-cancelar:hover {
-            background: #e2e8f0;
-            transform: translateY(-2px);
-        }
-        .btn-confirm-eliminar {
-            background: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-        }
-        .btn-confirm-eliminar:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-        }
-        .btn-confirm-eliminar:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .btn-confirm-eliminar .spinner {
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        
-        /* ============================================
-           MODAL DE USUARIO
-           ============================================ */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(6px);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-overlay.open { display: flex; }
-        
-        .modal {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 32px 35px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            animation: modalFadeIn 0.3s ease;
-        }
-        .modal::-webkit-scrollbar { width: 6px; }
-        .modal::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        .modal::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95) translateY(15px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        
-        .modal h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 20px;
-            padding-bottom: 14px;
-            border-bottom: 2px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 10;
-        }
-        .modal h3 .material-symbols-outlined {
-            color: var(--primary-color);
-            font-size: 1.6rem;
-        }
-        
-        .form-group {
-            margin-bottom: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-main);
-        }
-        .form-group label .required {
-            color: #ef4444;
-            margin-left: 2px;
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-            background: #fafbfc;
-            transition: all 0.25s ease;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--primary-color);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
-        }
-        .form-group input::placeholder {
-            color: #94a3b8;
-            font-weight: 300;
-        }
-        .form-group input.input-error {
-            border-color: #ef4444;
-            background: #fef2f2;
-        }
-        .form-group input.input-error:focus {
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
-        }
-        
-        .error-message {
-            color: #ef4444;
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-top: 3px;
-            display: none;
-        }
-        .error-message.show { display: block; }
-        
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .input-wrapper input {
-            flex: 1;
-            padding-right: 45px;
-            width: 100%;
-        }
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            cursor: pointer;
-            color: #94a3b8;
-            user-select: none;
-            font-size: 22px;
-            transition: color 0.25s ease;
-            background: transparent;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-        }
-        .toggle-password:hover {
-            color: var(--primary-color);
-        }
-        
-        .campos-paciente {
-            display: none;
-            border-top: 2px dashed #e2e8f0;
-            padding-top: 14px;
-            margin-top: 4px;
-        }
-        .campos-paciente.show {
-            display: block;
-        }
-        .campos-paciente .subtitulo {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 18px;
-            padding-top: 14px;
-            border-top: 1px solid #f1f5f9;
-            position: sticky;
-            bottom: 0;
-            background: #fff;
-            z-index: 10;
-            padding-bottom: 4px;
-        }
-        .modal-footer button {
-            padding: 10px 22px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        .btn-cancelar {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-        .btn-cancelar:hover {
-            background: #e2e8f0;
-        }
-        .btn-guardar {
-            background: var(--primary-color);
-            color: #ffffff;
-            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
-        }
-        .btn-guardar:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3);
-        }
-        .btn-guardar:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .btn-guardar .spinner {
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        #toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 14px 24px;
-            border-radius: 10px;
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.9rem;
-            z-index: 999;
-            opacity: 0;
-            transform: translateX(120%);
-            transition: all 0.4s ease;
-            pointer-events: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            max-width: 380px;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        #toast.show {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: auto;
-        }
-        #toast.success { background: #22c55e; }
-        #toast.error { background: #ef4444; }
-        #toast.warning { background: #eab308; color: #1e293b; }
-        
-        .table-container {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        thead th {
-            background: #f8fafc;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #64748b;
-            font-weight: 700;
-            padding: 14px 20px;
-        }
-        tbody td {
-            padding: 14px 20px;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        tbody tr:hover td {
-            background: #f8fafc;
-        }
-        .badge {
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge.blue { background: #e0f2fe; color: #0369a1; }
-        .badge.green { background: #dcfce7; color: #15803d; }
-        .badge.yellow { background: #fef9c3; color: #a16207; }
-        .badge.red { background: #fee2e2; color: #b91c1c; }
-        
-        .btn-icon {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .btn-icon:hover {
-            color: var(--primary-color);
-            background: #f1f5f9;
-        }
-        .btn-danger {
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .btn-danger:hover {
-            background: #fee2e2;
-        }
-        
-        .content-header h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-        .btn-primary {
-            background: var(--primary-color);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 8px rgba(2,132,199,0.2);
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2,132,199,0.3);
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .metric-card {
-            background: #ffffff;
-            padding: 20px 24px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-        .metric-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: #e0f2fe;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        .metric-data h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .metric-data p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin: 0;
-        }
-        
-        @media (max-width: 520px) {
-            .modal {
-                padding: 24px 18px;
-                max-width: 100%;
-                max-height: 95vh;
-            }
-            .row-2 {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            .modal-footer {
-                flex-direction: column-reverse;
-            }
-            .modal-footer button {
-                width: 100%;
-                justify-content: center;
-            }
-            .confirm-modal {
-                padding: 28px 20px;
-            }
-            .confirm-modal .confirm-footer {
-                flex-direction: column;
-            }
-            .confirm-modal .confirm-footer button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
+    <link href="../css/style.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+    <link href="../css/panel.css" rel="stylesheet"/>
 </head>
 <body>
-
-<div id="toast" class="toast"></div>
-
-<!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR -->
-<div id="confirmModal" class="confirm-overlay">
-    <div class="confirm-modal">
-        <span class="material-symbols-outlined confirm-icon warning" id="confirmIcon">warning</span>
-        <h3 id="confirmTitulo">¿Eliminar este usuario?</h3>
-        <p id="confirmMensaje">Esta acción no se puede deshacer. El usuario será eliminado permanentemente del sistema.</p>
-        <div class="user-info" id="userInfo">
-            <strong>Usuario:</strong> <span id="confirmCorreo" class="correo">—</span><br>
-            <strong>ID:</strong> <span id="confirmId">—</span> &nbsp;|&nbsp; <strong>Rol:</strong> <span id="confirmRol">—</span>
-        </div>
-        <div class="confirm-footer" id="confirmFooter">
-            <button class="btn-confirm-cancelar" onclick="cerrarConfirmModal()">
-                <span class="material-symbols-outlined">close</span> Cancelar
-            </button>
-            <button class="btn-confirm-eliminar" id="btnConfirmEliminar" onclick="confirmarEliminar()">
-                <span class="material-symbols-outlined">delete</span> Eliminar
-            </button>
+    <div class="toast" id="toast"></div>
+    
+    <!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR -->
+    <div class="confirm-overlay" id="confirmModal">
+        <div class="confirm-modal">
+            <span class="material-symbols-outlined confirm-icon warning" id="confirmIcon">warning</span>
+            <h3 id="confirmTitulo">¿Eliminar este usuario?</h3>
+            <p id="confirmMensaje">Esta acción no se puede deshacer. El usuario será eliminado permanentemente del sistema.</p>
+            <div class="user-info" id="userInfo">
+                <strong>Usuario:</strong> <span class="correo" id="confirmCorreo">—</span><br/>
+                <strong>ID:</strong> <span id="confirmId">—</span> &nbsp;|&nbsp; <strong>Rol:</strong> <span id="confirmRol">—</span>
+            </div>
+            <div class="confirm-footer" id="confirmFooter">
+                <button class="btn-confirm-cancelar" onclick="cerrarConfirmModal()">
+                    <span class="material-symbols-outlined">close</span> Cancelar
+                </button>
+                <button class="btn-confirm-eliminar" id="btnConfirmEliminar" onclick="confirmarEliminar()">
+                    <span class="material-symbols-outlined">delete</span> Eliminar
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL USUARIO -->
-<div id="modalUsuario" class="modal-overlay">
-    <div class="modal">
-        <h3>
-            <span class="material-symbols-outlined">person_add</span>
-            <span id="modalTitulo">Nuevo Usuario</span>
-        </h3>
-        <input type="hidden" id="editId">
+    <!-- MODAL USUARIO (CORREGIDO Y CERRADO CORRECTAMENTE) -->
+    <div class="modal-overlay" id="modalUsuario">
+        <div class="modal">
+            <h3>
+                <span class="material-symbols-outlined">person_add</span>
+                <span id="modalTitulo">Nuevo Usuario</span>
+            </h3>
 
-        <div class="form-group">
-            <label>Correo Electrónico <span class="required">*</span></label>
-            <input type="email" id="inCorreo" placeholder="usuario@dental.com">
-            <small id="correoError" class="error-message">Ingresa un correo electrónico válido</small>
-        </div>
+            <input id="editId" type="hidden"/>
 
-        <div class="form-group">
-            <label>Contraseña <span class="required">*</span></label>
-            <div class="input-wrapper">
-                <input type="password" id="inPassword" placeholder="••••••••">
-                <span class="material-symbols-outlined toggle-password" onclick="togglePassword('inPassword')">
-                    visibility_off
-                </span>
-            </div>
-            <small id="passwordError" class="error-message">La contraseña debe tener al menos 6 caracteres</small>
-        </div>
+            <!-- ========================= -->
+            <!-- DATOS DE ACCESO -->
+            <!-- ========================= -->
 
-        <div class="form-group">
-            <label>Rol <span class="required">*</span></label>
-            <select id="inRol" onchange="toggleCamposPaciente()">
-                <option value="Administrador">Administrador</option>
-                <option value="Odontologo">Odontólogo</option>
-                <option value="Paciente" selected>Paciente</option>
-            </select>
-        </div>
-
-        <div id="camposPaciente" class="campos-paciente show">
-            <div class="subtitulo">
-                <span class="material-symbols-outlined">badge</span> Datos del Paciente
-            </div>
-            <div class="row-2">
-                <div class="form-group">
-                    <label>Nombre <span class="required">*</span></label>
-                    <input type="text" id="inNombre" placeholder="Nombre">
-                </div>
-                <div class="form-group">
-                    <label>Apellido <span class="required">*</span></label>
-                    <input type="text" id="inApellido" placeholder="Apellido">
-                </div>
-            </div>
             <div class="form-group">
-                <label>Teléfono <span class="required">*</span></label>
-                <input type="tel" id="inTelefono" placeholder="3001234567">
-                <small id="telefonoError" class="error-message">Ingresa un número de teléfono válido</small>
+                <label>Correo Electrónico <span class="required">*</span></label>
+                <input id="inCorreo" type="email" placeholder="usuario@dental.com"/>
+                <small class="error-message" id="correoError">Ingresa un correo válido</small>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>Estado <span class="required">*</span></label>
-            <select id="inEstado">
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Contraseña <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input id="inPassword" type="password" placeholder="••••••••"/>
+                    <span class="material-symbols-outlined toggle-password" onclick="togglePassword('inPassword')">visibility_off</span>
+                </div>
+                <small class="error-message" id="passwordError">La contraseña debe tener mínimo 6 caracteres</small>
+            </div>
 
-        <div class="modal-footer">
-            <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-guardar" id="btnGuardarUsuario" onclick="guardarUsuario()">
-                <span class="material-symbols-outlined">save</span> Guardar
-            </button>
-        </div>
+            <div class="form-group">
+                <label>Rol <span class="required">*</span></label>
+                <!-- CORREGIDO: onchange llama a toggleCamposPaciente() -->
+               
+                <select id="inRol" onchange="toggleCamposPaciente()">
+                    <option value="Administrador">Administrador</option>
+                    <option value="Odontologo">Odontólogo</option>
+                    <option value="Paciente" selected>Paciente</option>
+                </select>
+            </div>
+
+            <!-- ========================= -->
+            <!-- CAMPOS COMUNES -->
+            <!-- ========================= -->
+
+            <div id="camposComunes" class="campos-seccion">
+                <div class="subtitulo">
+                    <span class="material-symbols-outlined">badge</span> Información Personal
+                </div>
+                <div class="row-2">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input id="inNombre" type="text" placeholder="Nombre"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido *</label>
+                        <input id="inApellido" type="text" placeholder="Apellido"/>
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group">
+                        <label>Documento *</label>
+                        <input
+    id="inDocumento"
+    type="text"
+    placeholder="CC12345678"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono *</label>
+                        <input id="inTelefono" type="text" placeholder="3001234567"/>
+                        <small class="error-message" id="telefonoError">Número inválido</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- PACIENTE -->
+            <!-- ========================= -->
+
+            <div id="camposPaciente" class="campos-seccion">
+                <div class="subtitulo">
+                    <span class="material-symbols-outlined">personal_injury</span> Información del Paciente
+                </div>
+                <div class="row-2">
+                    <div class="form-group">
+                        <label>Fecha nacimiento</label>
+                        <input id="inFechaNacimiento" type="date"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="inGenero">
+                            <option value="">Seleccione</option>
+                            <option>Masculino</option>
+                            <option>Femenino</option>
+                            <option>Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input id="inDireccion" type="text" placeholder="Dirección"/>
+                </div>
+                <div class="form-group">
+                    <label>EPS</label>
+                    <input id="inEps" type="text" placeholder="EPS"/>
+                </div>
+                <div class="form-group">
+                    <label>Alergias</label>
+                    <textarea id="inAlergias" rows="3" placeholder="Alergias"></textarea>
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- ODONTÓLOGO -->
+            <!-- ========================= -->
+
+          <div id="camposOdontologo" class="campos-seccion">
+    <div class="subtitulo">
+        <span class="material-symbols-outlined">dentistry</span>
+        Información Profesional
+    </div>
+
+    <div class="form-group">
+        <label>Especialidad <span class="required">*</span></label>
+        <input id="inEspecialidad" type="text" placeholder="Ortodoncia"/>
+    </div>
+
+    <div class="form-group">
+        <label>Consultorio <span class="required">*</span></label>
+        <select id="inConsultorio">
+            <option value="">Seleccione un consultorio</option>
+            <option value="1">Consultorio Central (101)</option>
+            <option value="2">Consultorio Norte (202)</option>
+        </select>
     </div>
 </div>
-
-<!-- DASHBOARD -->
-<div class="dashboard-container">
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="material-symbols-outlined">dentistry</span>
-            <span>OdontoSoft</span>
-        </div>
-        <!-- ============================================ -->
-        <!-- MENÚ CORREGIDO - SIN OPCIÓN "PACIENTE"      -->
-        <!-- ============================================ -->
-        <nav class="sidebar-menu">
-            <a href="panel.html" class="active"><span class="material-symbols-outlined">group</span> Usuarios</a>
-            <a href="roles.html"><span class="material-symbols-outlined">manage_accounts</span> Roles</a>
-            <a href="tratamientos.html"><span class="material-symbols-outlined">medical_services</span> Tratamientos</a>
-            <a href="citas.html"><span class="material-symbols-outlined">calendar_month</span> Citas</a>
-            <a href="proveedores.html"><span class="material-symbols-outlined">local_shipping</span> Proveedores</a>
-            <a href="login.html" onclick="localStorage.removeItem('usuario_actual')"><span class="material-symbols-outlined">logout</span> Salir</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="content-header">
-            <div>
-                <h2>Gestión de Usuarios</h2>
-                <p style="color:var(--text-muted)">Clínica e Historial del Personal</p>
+            <!-- ========================= -->
+            <!-- BOTONES DEL MODAL (AGREGADOS) -->
+            <!-- ========================= -->
+            <div class="modal-footer">
+                <button class="btn-cancelar" type="button" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-guardar" id="btnGuardarUsuario" type="button">
+                    <span class="material-symbols-outlined">save</span> Guardar
+                </button>
             </div>
-            <button class="btn-primary" onclick="abrirModal()">
-                <span class="material-symbols-outlined">person_add</span> Nuevo Usuario
-            </button>
-        </header>
 
-        <section class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-icon"><span class="material-symbols-outlined">badge</span></div>
-                <div class="metric-data"><h3 id="cntOdontologos">—</h3><p>Odontólogos Activos</p></div>
+        </div> <!-- Cierra .modal -->
+    </div> <!-- Cierra .modal-overlay -->
+
+    <!-- DASHBOARD -->
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="material-symbols-outlined">dentistry</span>
+                <span>OdontoSoft</span>
             </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background:#dcfce7;color:var(--success)">
-                    <span class="material-symbols-outlined">patient_list</span>
+            <nav class="sidebar-menu">
+                <a class="active" href="panel.html">
+                    <span class="material-symbols-outlined">group</span> Usuarios
+                </a>
+                <a href="roles.html">
+                    <span class="material-symbols-outlined">manage_accounts</span> Roles
+                </a>
+                <a href="tratamientos.html">
+                    <span class="material-symbols-outlined">medical_services</span> Tratamientos
+                </a>
+                <a href="citas.html">
+                    <span class="material-symbols-outlined">calendar_month</span> Citas
+                </a>
+                <a href="proveedores.html">
+                    <span class="material-symbols-outlined">local_shipping</span> Proveedores
+                </a>
+                <a href="login.html" onclick="localStorage.removeItem('usuario_actual')">
+                    <span class="material-symbols-outlined">logout</span> Salir
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div>
+                    <h2>Gestión de Usuarios</h2>
+                    <p style="color:var(--text-muted)">Clínica e Historial del Personal</p>
                 </div>
-                <div class="metric-data"><h3 id="cntPacientes">—</h3><p>Pacientes Registrados</p></div>
-            </div>
-        </section>
+                <button class="btn-primary" onclick="abrirModal()">
+                    <span class="material-symbols-outlined">person_add</span> Nuevo Usuario
+                </button>
+            </header>
 
-        <section class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Correo Electrónico</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaUsuarios">
-                    <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-</div>
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <span class="material-symbols-outlined">badge</span>
+                    </div>
+                    <div class="metric-data">
+                        <h3 id="cntOdontologos">—</h3>
+                        <p>Odontólogos Activos</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background:#dcfce7;color:var(--success)">
+                        <span class="material-symbols-outlined">patient_list</span>
+                    </div>
+                    <div class="metric-data">
+                        <h3 id="cntPacientes">—</h3>
+                        <p>Pacientes Registrados</p>
+                    </div>
+                </div>
+            </section>
 
-<script>
-    // ── Variables para el modal de confirmación ──────────────────────────────────
-    let usuarioAEliminar = null;
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Correo Electrónico</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaUsuarios">
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">
+                                Cargando...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 
-    // ── Mostrar/ocultar contraseña ──────────────────────────────────────────────
-    function togglePassword(id) {
-        const input = document.getElementById(id);
-        const icon = input.nextElementSibling;
-        if (input.type === "password") {
-            input.type = "text";
-            icon.textContent = "visibility";
-        } else {
-            input.type = "password";
-            icon.textContent = "visibility_off";
-        }
-    }
-
-    // ── Mostrar/ocultar campos de paciente ────────────────────────────────────
-    function toggleCamposPaciente() {
-        const rol = document.getElementById('inRol').value;
-        const campos = document.getElementById('camposPaciente');
-        if (rol === 'Paciente') {
-            campos.classList.add('show');
-        } else {
-            campos.classList.remove('show');
-        }
-    }
-
-    // ── Validar correo ───────────────────────────────────────────────────────────
-    function validarCorreo(correo) {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(correo);
-    }
-
-    // ── Validar teléfono ──────────────────────────────────────────────────────
-    function validarTelefono(telefono) {
-        const regex = /^[0-9+\-\s]{7,15}$/;
-        return regex.test(telefono);
-    }
-
-    // ── Toast ──────────────────────────────────────────────────────────────────
-    function toast(msg, tipo = "success") {
-        const t = document.getElementById("toast");
-        if (!t) return;
-        t.textContent = msg;
-        t.className = `toast show ${tipo}`;
-        setTimeout(() => t.classList.remove("show"), 3500);
-    }
-
-    // ── API ──────────────────────────────────────────────────────────────────────
-    const API = "http://127.0.0.1:8000";
-
-    async function api(method, path, body = null) {
-        const res = await fetch(`${API}${path}`, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: body ? JSON.stringify(body) : null,
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.detail || `Error ${res.status}`);
-        }
-        return res.status === 204 ? null : res.json();
-    }
-
-    // ── Validación en tiempo real ────────────────────────────────────────────────
-    const correoInput = document.getElementById('inCorreo');
-    const correoError = document.getElementById('correoError');
-
-    correoInput.addEventListener('input', function() {
-        const correo = this.value.trim();
-        if (correo.length === 0) {
-            this.classList.remove('input-error');
-            correoError.classList.remove('show');
-            return;
-        }
-        if (validarCorreo(correo)) {
-            this.classList.remove('input-error');
-            correoError.classList.remove('show');
-        } else {
-            this.classList.add('input-error');
-            correoError.classList.add('show');
-        }
-    });
-
-    const passwordInput = document.getElementById('inPassword');
-    const passwordError = document.getElementById('passwordError');
-
-    passwordInput.addEventListener('input', function() {
-        const pwd = this.value;
-        if (pwd.length > 0 && pwd.length < 6) {
-            this.classList.add('input-error');
-            passwordError.classList.add('show');
-        } else {
-            this.classList.remove('input-error');
-            passwordError.classList.remove('show');
-        }
-    });
-
-    const telefonoInput = document.getElementById('inTelefono');
-    const telefonoError = document.getElementById('telefonoError');
-
-    telefonoInput.addEventListener('input', function() {
-        const telefono = this.value.trim();
-        if (telefono.length === 0) {
-            this.classList.remove('input-error');
-            telefonoError.classList.remove('show');
-            return;
-        }
-        if (validarTelefono(telefono)) {
-            this.classList.remove('input-error');
-            telefonoError.classList.remove('show');
-        } else {
-            this.classList.add('input-error');
-            telefonoError.classList.add('show');
-        }
-    });
-
-    // ── Renderizar tabla ───────────────────────────────────────────────────────
-    function renderTabla(usuarios) {
-        const colores = { "Administrador": "red", "Odontologo": "blue", "Paciente": "yellow" };
-        const tbody = document.getElementById("tablaUsuarios");
-
-        if (!usuarios || !usuarios.length) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Sin usuarios registrados</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = usuarios.map(u => `
-            <tr>
-                <td><strong>${u.id_usuario}</strong></td>
-                <td>${u.correo}</td>
-                <td><span class="badge ${colores[u.rol] || 'blue'}">${u.rol || '—'}</span></td>
-                <td><span class="badge ${u.estado === 'Activo' ? 'green' : 'yellow'}">${u.estado || '—'}</span></td>
-                <td>
-                    <button class="btn-icon" title="Editar" onclick="editarUsuario(${u.id_usuario})">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-                    <button class="btn-danger" title="Eliminar" onclick="abrirConfirmModal(${u.id_usuario}, '${u.correo}', '${u.rol}')">
-                        <span class="material-symbols-outlined">delete</span>
-                    </button>
-                </td>
-            </tr>
-        `).join("");
-
-        document.getElementById("cntOdontologos").textContent = usuarios.filter(u => u.rol === "Odontologo").length;
-        document.getElementById("cntPacientes").textContent = usuarios.filter(u => u.rol === "Paciente").length;
-    }
-
-    // ── Cargar usuarios ────────────────────────────────────────────────────────
-    async function cargarUsuarios() {
-        try {
-            const usuarios = await api("GET", "/usuarios");
-            renderTabla(usuarios);
-        } catch (e) {
-            toast("❌ No se pudo conectar con el servidor", "error");
-            console.error(e);
-        }
-    }
-
-    // ── Modal Usuario ──────────────────────────────────────────────────────────
-    function abrirModal() {
-        document.getElementById("editId").value = "";
-        document.getElementById("modalTitulo").textContent = "Nuevo Usuario";
-        
-        document.getElementById("inCorreo").value = "";
-        document.getElementById("inCorreo").classList.remove('input-error');
-        document.getElementById("correoError").classList.remove('show');
-        document.getElementById("inPassword").value = "";
-        document.getElementById("inPassword").classList.remove('input-error');
-        document.getElementById("passwordError").classList.remove('show');
-        document.getElementById("inNombre").value = "";
-        document.getElementById("inApellido").value = "";
-        document.getElementById("inTelefono").value = "";
-        document.getElementById("inTelefono").classList.remove('input-error');
-        document.getElementById("telefonoError").classList.remove('show');
-        document.getElementById("inRol").value = "Paciente";
-        document.getElementById("inEstado").value = "Activo";
-        
-        toggleCamposPaciente();
-        
-        document.getElementById("btnGuardarUsuario").disabled = false;
-        document.getElementById("btnGuardarUsuario").innerHTML = '<span class="material-symbols-outlined">save</span> Guardar';
-        document.getElementById("modalUsuario").classList.add("open");
-    }
-
-    function cerrarModal() {
-        document.getElementById("modalUsuario").classList.remove("open");
-    }
-
-    async function editarUsuario(id) {
-        try {
-            const u = await api("GET", `/usuarios/${id}`);
-            document.getElementById("editId").value = u.id_usuario;
-            document.getElementById("modalTitulo").textContent = "Editar Usuario";
-            document.getElementById("inCorreo").value = u.correo;
-            document.getElementById("inCorreo").classList.remove('input-error');
-            document.getElementById("correoError").classList.remove('show');
-            document.getElementById("inPassword").value = "••••••••";
-            document.getElementById("inPassword").classList.remove('input-error');
-            document.getElementById("passwordError").classList.remove('show');
-            document.getElementById("inRol").value = u.rol;
-            document.getElementById("inEstado").value = u.estado;
-            
-            document.getElementById("inNombre").value = "";
-            document.getElementById("inApellido").value = "";
-            document.getElementById("inTelefono").value = "";
-            document.getElementById("inTelefono").classList.remove('input-error');
-            document.getElementById("telefonoError").classList.remove('show');
-            
-            toggleCamposPaciente();
-            
-            document.getElementById("btnGuardarUsuario").disabled = false;
-            document.getElementById("btnGuardarUsuario").innerHTML = '<span class="material-symbols-outlined">save</span> Guardar';
-            document.getElementById("modalUsuario").classList.add("open");
-        } catch (e) {
-            toast(`❌ ${e.message}`, "error");
-        }
-    }
-
-    async function guardarUsuario() {
-        const id = document.getElementById("editId").value;
-        const correo = document.getElementById("inCorreo").value.trim();
-        const contrasena = document.getElementById("inPassword").value.trim();
-        const rol = document.getElementById("inRol").value;
-        const estado = document.getElementById("inEstado").value;
-        const btn = document.getElementById("btnGuardarUsuario");
-
-        if (!correo) {
-            toast("✉️ Por favor, ingresa el correo electrónico", "warning");
-            document.getElementById("inCorreo").focus();
-            return;
-        }
-        if (!validarCorreo(correo)) {
-            toast("✉️ Ingresa un correo electrónico válido", "error");
-            document.getElementById("inCorreo").focus();
-            return;
-        }
-
-        if (!contrasena) {
-            toast("🔑 Por favor, ingresa la contraseña", "warning");
-            document.getElementById("inPassword").focus();
-            return;
-        }
-        if (contrasena.length < 6) {
-            toast("🔑 La contraseña debe tener al menos 6 caracteres", "error");
-            document.getElementById("inPassword").focus();
-            return;
-        }
-
-        let nombre = document.getElementById("inNombre").value.trim();
-        let apellido = document.getElementById("inApellido").value.trim();
-        let telefono = document.getElementById("inTelefono").value.trim();
-
-        if (rol === "Paciente") {
-            if (!nombre) {
-                toast("👤 Por favor, ingresa el nombre del paciente", "warning");
-                document.getElementById("inNombre").focus();
-                return;
-            }
-            if (!apellido) {
-                toast("👤 Por favor, ingresa el apellido del paciente", "warning");
-                document.getElementById("inApellido").focus();
-                return;
-            }
-            if (!telefono) {
-                toast("📱 Por favor, ingresa el teléfono del paciente", "warning");
-                document.getElementById("inTelefono").focus();
-                return;
-            }
-            if (!validarTelefono(telefono)) {
-                toast("📱 Ingresa un número de teléfono válido (ej: 3001234567)", "error");
-                document.getElementById("inTelefono").focus();
-                return;
-            }
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined spinner">progress_activity</span> Guardando...`;
-
-        try {
-            let dataEnviar;
-            
-            if (id) {
-                dataEnviar = { correo, contrasena, rol, estado };
-                await api("PUT", `/usuarios/${id}`, dataEnviar);
-                toast("✅ Usuario actualizado correctamente", "success");
-            } else {
-                if (rol === "Paciente") {
-                    dataEnviar = { correo, contrasena, nombre, apellido, telefono };
-                    await api("POST", "/usuarios/registro", dataEnviar);
-                    toast("✅ Paciente registrado correctamente", "success");
-                } else {
-                    dataEnviar = { correo, contrasena, rol, estado };
-                    await api("POST", "/usuarios", dataEnviar);
-                    toast(`✅ ${rol} registrado correctamente`, "success");
-                }
-            }
-            
-            cerrarModal();
-            cargarUsuarios();
-            
-        } catch (error) {
-            toast(`❌ ${error.message || "Error al guardar"}`, "error");
-            btn.disabled = false;
-            btn.innerHTML = `<span class="material-symbols-outlined">save</span> Guardar`;
-        }
-    }
-
-    // ── MODAL DE CONFIRMACIÓN PARA ELIMINAR ────────────────────────────────────
-    function abrirConfirmModal(id, correo, rol) {
-        usuarioAEliminar = id;
-        
-        // Resetear el modal a su estado normal
-        const icon = document.getElementById("confirmIcon");
-        icon.textContent = "warning";
-        icon.className = "material-symbols-outlined confirm-icon warning";
-        document.getElementById("confirmTitulo").textContent = "¿Eliminar este usuario?";
-        document.getElementById("confirmMensaje").textContent = "Esta acción no se puede deshacer. El usuario será eliminado permanentemente del sistema.";
-        document.getElementById("userInfo").style.display = "block";
-        document.getElementById("confirmFooter").style.display = "flex";
-        
-        document.getElementById("confirmId").textContent = id;
-        document.getElementById("confirmCorreo").textContent = correo;
-        document.getElementById("confirmRol").textContent = rol;
-        
-        const btn = document.getElementById("btnConfirmEliminar");
-        btn.disabled = false;
-        btn.className = "btn-confirm-eliminar";
-        btn.innerHTML = '<span class="material-symbols-outlined">delete</span> Eliminar';
-        btn.onclick = function() { confirmarEliminar(); };
-        
-        document.getElementById("confirmModal").classList.add("open");
-    }
-
-    function cerrarConfirmModal() {
-        document.getElementById("confirmModal").classList.remove("open");
-        usuarioAEliminar = null;
-    }
-
-    function mostrarErrorConfirmacion(mensaje) {
-        const icon = document.getElementById("confirmIcon");
-        icon.textContent = "error";
-        icon.className = "material-symbols-outlined confirm-icon error";
-        
-        document.getElementById("confirmTitulo").textContent = "❌ No se puede eliminar";
-        document.getElementById("confirmMensaje").textContent = mensaje || "El usuario no se puede eliminar porque tiene registros asociados en el sistema.";
-        document.getElementById("userInfo").style.display = "none";
-        document.getElementById("confirmFooter").style.display = "flex";
-        
-        const btn = document.getElementById("btnConfirmEliminar");
-        btn.disabled = false;
-        btn.className = "btn-confirm-cancelar";
-        btn.innerHTML = '<span class="material-symbols-outlined">close</span> Cerrar';
-        btn.onclick = function() { cerrarConfirmModal(); };
-    }
-
-    // ── CONFIRMAR ELIMINAR ──────────────────────────────────────────────────────
-    async function confirmarEliminar() {
-        if (!usuarioAEliminar) return;
-        
-        const btn = document.getElementById("btnConfirmEliminar");
-        btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined spinner">progress_activity</span> Eliminando...`;
-
-        try {
-            const response = await fetch(`${API}/usuarios/${usuarioAEliminar}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            const responseText = await response.text();
-            console.log("📥 Respuesta DELETE:", responseText);
-            
-            if (!response.ok) {
-                let errorMsg;
-                try {
-                    const errorData = JSON.parse(responseText);
-                    errorMsg = errorData.detail || errorData.message || `Error ${response.status}`;
-                } catch (_) {
-                    errorMsg = `Error ${response.status}: ${responseText}`;
-                }
-                throw new Error(errorMsg);
-            }
-            
-            toast("✅ Usuario eliminado correctamente", "success");
-            cerrarConfirmModal();
-            cargarUsuarios();
-            
-        } catch (error) {
-            console.error("❌ Error al eliminar:", error);
-            let mensajeError = error.message || "Error al eliminar el usuario";
-            if (mensajeError.includes("pacientes asociados")) {
-                mensajeError = "Este usuario tiene pacientes asociados. No se puede eliminar directamente.";
-            }
-            toast(`❌ ${mensajeError}`, "error");
-            mostrarErrorConfirmacion(mensajeError);
-        }
-    }
-
-    // ── Verificar sesión ─────────────────────────────────────────────────────────
-    const usuarioActual = JSON.parse(localStorage.getItem('usuario_actual') || 'null');
-    if (!usuarioActual) {
-        window.location.href = "login.html";
-    }
-
-    // ── Inicio ─────────────────────────────────────────────────────────────────
-    cargarUsuarios();
-</script>
+    <script src="../js/panel.js"></script>
 </body>
 </html>

@@ -29,7 +29,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Sin borde rojo en el campo de correo */
         .form-group input {
             transition: all 0.25s ease;
         }
@@ -79,7 +78,6 @@
 </div>
 
 <script>
-    // ── Mostrar/ocultar contraseña ──────────────────────────────────────────────
     function togglePassword(id) {
         const input = document.getElementById(id);
         const icon = input.nextElementSibling;
@@ -92,24 +90,20 @@
         }
     }
 
-    // ── Validar correo ───────────────────────────────────────────────────────────
     function validarCorreo(correo) {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return regex.test(correo);
     }
 
-    // ── Validación en tiempo real del correo ────────────────────────────────────
     const correoInput = document.getElementById('inCorreo');
     const correoHelper = document.getElementById('correoHelper');
 
     correoInput.addEventListener('input', function() {
         const correo = this.value.trim();
-        
         if (correo.length === 0) {
             correoHelper.classList.remove('show');
             return;
         }
-        
         if (validarCorreo(correo)) {
             correoHelper.classList.remove('show');
         } else {
@@ -118,7 +112,6 @@
         }
     });
 
-    // ── Toast ──────────────────────────────────────────────────────────────────
     function toast(msg, tipo = "success") {
         const t = document.getElementById("toast");
         t.textContent = msg;
@@ -126,7 +119,6 @@
         setTimeout(() => t.classList.remove("show"), 3000);
     }
 
-    // ── Función de login ─────────────────────────────────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -134,33 +126,29 @@
         const password = document.getElementById('inPassword').value;
         const btn = document.getElementById('btnLogin');
 
-        // Validar correo vacío
         if (!correo) {
             toast('✉️ Por favor, ingresa tu correo electrónico', 'warning');
             document.getElementById('inCorreo').focus();
             return;
         }
 
-        // Validar formato de correo
         if (!validarCorreo(correo)) {
             toast('✉️ Ingresa un correo electrónico válido', 'error');
             document.getElementById('inCorreo').focus();
             return;
         }
 
-        // Validar contraseña vacía
         if (!password) {
             toast('🔑 Por favor, ingresa tu contraseña', 'warning');
             document.getElementById('inPassword').focus();
             return;
         }
 
-        // Deshabilitar botón
         btn.disabled = true;
         btn.innerHTML = `<span class="material-symbols-outlined spinner">progress_activity</span> Verificando...`;
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/auth/login', {
+            const response = await fetch('http://localhost:8000/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ correo, contrasena: password })
@@ -168,7 +156,6 @@
 
             if (!response.ok) {
                 let errorMsg = 'Error de autenticación';
-                
                 try {
                     const errorData = await response.json();
                     if (errorData.detail) {
@@ -189,13 +176,10 @@
                     else if (response.status === 401) errorMsg = '❌ Contraseña incorrecta';
                     else errorMsg = `❌ Error ${response.status}. Intenta nuevamente.`;
                 }
-                
                 throw new Error(errorMsg);
             }
 
             const usuario = await response.json();
-            
-            // Guardar sesión
             localStorage.setItem('usuario_actual', JSON.stringify(usuario));
             
             const roles = { 'Administrador': 'Administrador', 'Odontologo': 'Odontólogo', 'Paciente': 'Paciente' };
@@ -203,23 +187,20 @@
             
             toast(`✅ ¡Bienvenido, ${usuario.correo}! (${rolUsuario})`, 'success');
 
-            // Redirigir según el rol
+            // 🔥 REDIRECCIÓN CORREGIDA
             setTimeout(() => {
                 const destino = usuario.rol === 'Paciente' ? 'panel_cliente.html' : 'panel.html';
+                console.log('🔄 Redirigiendo a:', destino);
                 window.location.href = destino;
             }, 2000);
 
         } catch (error) {
             console.error('Error en login:', error);
-            
             let mensajeError = error.message || 'Ocurrió un error inesperado. Intenta nuevamente.';
-            
             if (mensajeError.includes('Failed to fetch') || mensajeError.includes('NetworkError')) {
                 mensajeError = '❌ No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
             }
-            
             toast(mensajeError, 'error');
-            
             btn.disabled = false;
             btn.innerHTML = `<span class="material-symbols-outlined">login</span> Ingresar`;
         }

@@ -1,386 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>OdontoSoft - Citas</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
-    <style>
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(8px);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-overlay.open { display: flex; }
-        
-        .modal {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 32px 35px;
-            width: 100%;
-            max-width: 550px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            animation: modalFadeIn 0.3s ease;
-        }
-        .modal::-webkit-scrollbar { width: 6px; }
-        .modal::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        .modal::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95) translateY(15px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        
-        .modal h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 22px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 10;
-        }
-        .modal h3 .material-symbols-outlined {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-main);
-        }
-        .form-group label .required {
-            color: #ef4444;
-            margin-left: 2px;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 11px 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-            background: #fafbfc;
-            transition: all 0.25s ease;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary-color);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 22px;
-            padding-top: 16px;
-            border-top: 1px solid #f1f5f9;
-            position: sticky;
-            bottom: 0;
-            background: #fff;
-            z-index: 10;
-            padding-bottom: 4px;
-        }
-        .modal-footer button {
-            padding: 11px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        .btn-cancelar {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-        .btn-cancelar:hover {
-            background: #e2e8f0;
-            transform: translateY(-2px);
-        }
-        .btn-guardar {
-            background: var(--primary-color);
-            color: #ffffff;
-            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
-        }
-        .btn-guardar:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3);
-        }
-        .btn-guardar:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .btn-guardar .spinner {
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .table-container {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 30px;
-        }
-        .table-container table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .table-container thead th {
-            background: #f8fafc;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #64748b;
-            font-weight: 700;
-            padding: 12px 16px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        .table-container tbody td {
-            padding: 12px 16px;
-            font-size: 0.85rem;
-            border-bottom: 1px solid #f1f5f9;
-            color: var(--text-main);
-            vertical-align: middle;
-        }
-        .table-container tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .table-container tbody tr:hover td {
-            background: #f8fafc;
-        }
-        .table-container .subtext {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            display: block;
-        }
-        
-        .badge {
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            display: inline-block;
-        }
-        .badge.blue { background: #e0f2fe; color: #0369a1; }
-        .badge.green { background: #dcfce7; color: #15803d; }
-        .badge.yellow { background: #fef9c3; color: #a16207; }
-        .badge.red { background: #fee2e2; color: #b91c1c; }
-        .badge.purple { background: #ede9fe; color: #6d28d9; }
-        
-        .btn-icon {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .btn-icon:hover {
-            color: var(--primary-color);
-            background: #f1f5f9;
-        }
-        .btn-danger {
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .btn-danger:hover {
-            background: #fee2e2;
-        }
-        
-        .btn-primary {
-            background: var(--primary-color);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 8px rgba(2,132,199,0.2);
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2,132,199,0.3);
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
-            margin-bottom: 25px;
-        }
-        .metric-card {
-            background: #ffffff;
-            padding: 16px 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-        .metric-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        }
-        .metric-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        .metric-data h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .metric-data p {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            margin: 0;
-        }
-        
-        .content-header h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-        
-        #toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 14px 24px;
-            border-radius: 10px;
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.9rem;
-            z-index: 999;
-            opacity: 0;
-            transform: translateX(120%);
-            transition: all 0.4s ease;
-            pointer-events: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            max-width: 380px;
-            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-        }
-        #toast.show {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: auto;
-        }
-        #toast.success { background: #22c55e; }
-        #toast.error { background: #ef4444; }
-        #toast.warning { background: #eab308; color: #1e293b; }
-        
-        @media (max-width: 768px) {
-            .content-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .content-header .btn-primary {
-                width: 100%;
-                justify-content: center;
-            }
-            .modal {
-                padding: 24px 18px;
-            }
-            .metrics-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .table-container thead th,
-            .table-container tbody td {
-                padding: 8px 10px;
-                font-size: 0.75rem;
-            }
-        }
-        @media (max-width: 480px) {
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal {
-                padding: 20px 16px;
-            }
-        }
-    </style>
+    <link href="../css/style.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+    <link href="../css/citas.css" rel="stylesheet"/>
 </head>
 <body>
+    <div class="toast" id="toast"></div>
 
-<div id="toast" class="toast"></div>
+    <!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR CITAS -->
+    <div class="confirm-overlay" id="confirmModal">
+        <div class="confirm-modal">
+            <span class="material-symbols-outlined confirm-icon warning" id="confirmIcon">warning</span>
+            <h3 id="confirmTitulo">¿Eliminar esta cita?</h3>
+            <p id="confirmMensaje">Esta acción no se puede deshacer. La cita será eliminada permanentemente del sistema.</p>
+            <div class="cita-info" id="citaInfo">
+                <strong>Paciente:</strong> <span id="confirmPaciente" class="paciente-nombre">—</span><br>
+                <strong>Fecha:</strong> <span id="confirmFecha" class="info-text">—</span><br>
+                <strong>Hora:</strong> <span id="confirmHora" class="info-text">—</span><br>
+                <strong>Tratamiento:</strong> <span id="confirmTratamiento" class="info-text">—</span>
+            </div>
+            <div class="confirm-footer" id="confirmFooter">
+                <button class="btn-confirm-cancelar" onclick="cerrarConfirmModal()">
+                    <span class="material-symbols-outlined">close</span> Cancelar
+                </button>
+                <button class="btn-confirm-eliminar" id="btnConfirmEliminar" onclick="confirmarEliminar()">
+                    <span class="material-symbols-outlined">delete</span> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
 
-<!-- MODAL CITA -->
-<div id="modalCita" class="modal-overlay">
+  <!-- MODAL CITA -->
+<div class="modal-overlay" id="modalCita">
     <div class="modal">
         <h3>
             <span class="material-symbols-outlined">calendar_month</span>
             <span id="modalTitulo">Nueva Cita</span>
         </h3>
-        <input type="hidden" id="editId">
+        <input id="editId" type="hidden"/>
 
         <div class="form-group">
             <label>Paciente <span class="required">*</span></label>
@@ -398,13 +59,18 @@
         </div>
 
         <div class="form-group">
+            <label>Consultorio <span class="required">*</span></label>
+            <select id="inConsultorio"></select>
+        </div>
+
+        <div class="form-group">
             <label>Fecha <span class="required">*</span></label>
-            <input type="date" id="inFecha">
+            <input id="inFecha" type="date"/>
         </div>
 
         <div class="form-group">
             <label>Hora <span class="required">*</span></label>
-            <input type="time" id="inHora">
+            <input id="inHora" type="time"/>
         </div>
 
         <div class="form-group">
@@ -419,383 +85,102 @@
 
         <div class="form-group">
             <label>Motivo de Consulta</label>
-            <input type="text" id="inMotivo" placeholder="Motivo de la consulta...">
+            <input id="inMotivo" placeholder="Motivo de la consulta..." type="text"/>
         </div>
 
         <div class="form-group">
             <label>Observaciones</label>
-            <textarea id="inObservaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
+            <textarea id="inObservaciones" placeholder="Observaciones adicionales..." rows="3"></textarea>
         </div>
 
         <div class="modal-footer">
             <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-guardar" id="btnGuardarCita" onclick="guardarCita()">
+            <button class="btn-guardar" id="btnGuardarCita">
                 <span class="material-symbols-outlined">save</span> Guardar
             </button>
         </div>
     </div>
-</div>
-
-<!-- DASHBOARD -->
-<div class="dashboard-container">
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="material-symbols-outlined">dentistry</span>
-            <span>OdontoSoft</span>
-        </div>
-        <nav class="sidebar-menu">
-            <a href="panel.html"><span class="material-symbols-outlined">group</span> Usuarios</a>
-            <a href="roles.html"><span class="material-symbols-outlined">manage_accounts</span> Roles</a>
-            <a href="tratamientos.html"><span class="material-symbols-outlined">medical_services</span> Tratamientos</a>
-            <a href="citas.html" class="active"><span class="material-symbols-outlined">calendar_month</span> Citas</a>
-            <a href="proveedores.html"><span class="material-symbols-outlined">local_shipping</span> Proveedores</a>
-            <a href="login.html" onclick="localStorage.removeItem('usuario_actual')"><span class="material-symbols-outlined">logout</span> Salir</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="content-header">
-            <div>
-                <h2>Agenda de Citas</h2>
-                <p style="color:var(--text-muted)">Gestión de citas odontológicas</p>
+</div>  
+    <!-- DASHBOARD -->
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="material-symbols-outlined">dentistry</span>
+                <span>OdontoSoft</span>
             </div>
-            <button class="btn-primary" onclick="abrirModal()">
-                <span class="material-symbols-outlined">add</span> Nueva Cita
-            </button>
-        </header>
+            <nav class="sidebar-menu">
+                <a href="panel.html"><span class="material-symbols-outlined">group</span> Usuarios</a>
+                <a href="roles.html"><span class="material-symbols-outlined">manage_accounts</span> Roles</a>
+                <a href="tratamientos.html"><span class="material-symbols-outlined">medical_services</span> Tratamientos</a>
+                <a class="active" href="citas.html"><span class="material-symbols-outlined">calendar_month</span> Citas</a>
+                <a href="proveedores.html"><span class="material-symbols-outlined">local_shipping</span> Proveedores</a>
+                <a href="../login.html" onclick="localStorage.removeItem('usuario_actual')"><span class="material-symbols-outlined">logout</span> Salir</a>
+            </nav>
+        </aside>
 
-        <section class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-icon" style="background:#fef3c7;color:#d97706">
-                    <span class="material-symbols-outlined">schedule</span>
+        <main class="main-content">
+            <header class="content-header">
+                <div>
+                    <h2>Agenda de Citas</h2>
+                    <p style="color:var(--text-muted)">Gestión de citas odontológicas</p>
                 </div>
-                <div class="metric-data">
-                    <h3 id="cntEspera">—</h3>
-                    <p>En Espera</p>
+                <button class="btn-primary" onclick="abrirModal()">
+                    <span class="material-symbols-outlined">add</span> Nueva Cita
+                </button>
+            </header>
+
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background:#fef3c7;color:#d97706">
+                        <span class="material-symbols-outlined">schedule</span>
+                    </div>
+                    <div class="metric-data">
+                        <h3 id="cntEspera">—</h3>
+                        <p>En Espera</p>
+                    </div>
                 </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background:#e0f2fe;color:#0369a1">
-                    <span class="material-symbols-outlined">medical_services</span>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background:#e0f2fe;color:#0369a1">
+                        <span class="material-symbols-outlined">medical_services</span>
+                    </div>
+                    <div class="metric-data">
+                        <h3 id="cntConsulta">—</h3>
+                        <p>En Consulta</p>
+                    </div>
                 </div>
-                <div class="metric-data">
-                    <h3 id="cntConsulta">—</h3>
-                    <p>En Consulta</p>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background:#dcfce7;color:#15803d">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="metric-data">
+                        <h3 id="cntFinalizado">—</h3>
+                        <p>Finalizadas</p>
+                    </div>
                 </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background:#dcfce7;color:#15803d">
-                    <span class="material-symbols-outlined">check_circle</span>
-                </div>
-                <div class="metric-data">
-                    <h3 id="cntFinalizado">—</h3>
-                    <p>Finalizadas</p>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Odontólogo</th>
-                        <th>Tratamiento</th>
-                        <th>Fecha y Hora</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaCitas">
-                    <tr>
-                        <td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-</div>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Odontólogo</th>
+                            <th>Tratamiento</th>
+                            <th>Fecha y Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCitas">
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 
-<script>
-    // ── Variables ──────────────────────────────────────────────────────────────
-    const API = "http://127.0.0.1:8000";
-    let usuarios = [];
-    let pacientes = [];
-    let odontologos = [];
-    let tratamientos = [];
-    let citas = [];
-    let pacientesData = [];
-    let odontologosData = [];
-    let usuarioPacienteRelaciones = [];
-
-    // ── Toast ──────────────────────────────────────────────────────────────────
-    function toast(msg, tipo = "success") {
-        const t = document.getElementById("toast");
-        if (!t) return;
-        t.textContent = msg;
-        t.className = `toast show ${tipo}`;
-        setTimeout(() => t.classList.remove("show"), 3500);
-    }
-
-    // ── API ──────────────────────────────────────────────────────────────────
-    async function api(method, path, body = null) {
-        const res = await fetch(`${API}${path}`, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: body ? JSON.stringify(body) : null,
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.detail || `Error ${res.status}`);
-        }
-        return res.status === 204 ? null : res.json();
-    }
-
-    // ── Obtener correo del usuario asociado al paciente ──────────────────────
-    function getPacienteInfo(idPaciente) {
-        const paciente = pacientesData.find(p => p.id_paciente === idPaciente);
-        if (!paciente) return { nombre: '—', correo: '—' };
-        
-        // Buscar el usuario asociado a este paciente
-        const usuario = usuarios.find(u => u.correo === paciente.correo);
-        return {
-            nombre: `${paciente.nombre} ${paciente.apellido}`,
-            correo: paciente.correo || usuario?.correo || '—'
-        };
-    }
-
-    // ── Obtener correo del usuario asociado al odontólogo ──────────────────────
-    function getOdontologoInfo(idOdontologo) {
-        const odontologo = odontologosData.find(o => o.id_odontologo === idOdontologo);
-        if (!odontologo) return { nombre: '—', correo: '—' };
-        
-        // Buscar el usuario asociado a este odontólogo por correo
-        const usuario = usuarios.find(u => u.correo === odontologo.correo);
-        return {
-            nombre: `${odontologo.nombre} ${odontologo.apellido}`,
-            correo: odontologo.correo || usuario?.correo || '—'
-        };
-    }
-
-    // ── Obtener nombre del tratamiento por ID de cita ────────────────────────
-    function getTratamientoPorCita(idCita) {
-        const t = tratamientos.find(t => t.id_cita === idCita);
-        return t ? t.nombre : '—';
-    }
-
-    // ── Colores para estados ──────────────────────────────────────────────────
-    const coloresEstado = {
-        "En Espera": "yellow",
-        "En Consulta": "blue",
-        "Finalizado": "green",
-        "Cancelado": "red"
-    };
-
-    // ── Cargar datos ──────────────────────────────────────────────────────────
-    async function cargarDatos() {
-        try {
-            const [usuariosRes, tratamientosRes, citasRes, pacientesRes, odontologosRes] = await Promise.all([
-                api("GET", "/usuarios"),
-                api("GET", "/tratamientos"),
-                api("GET", "/citas"),
-                api("GET", "/pacientes"),
-                api("GET", "/odontologos")
-            ]);
-
-            usuarios = usuariosRes;
-            tratamientos = tratamientosRes;
-            citas = citasRes;
-            pacientesData = pacientesRes;
-            odontologosData = odontologosRes;
-
-            pacientes = usuarios.filter(u => u.rol === "Paciente");
-            odontologos = usuarios.filter(u => u.rol === "Odontologo");
-
-            console.log("📋 Pacientes Data:", pacientesData);
-            console.log("📋 Odontólogos Data:", odontologosData);
-            console.log("📋 Usuarios:", usuarios);
-
-            renderTabla();
-            actualizarMetricas();
-        } catch (error) {
-            console.error("Error:", error);
-            toast("❌ Error al cargar los datos", "error");
-        }
-    }
-
-    // ── Renderizar tabla ──────────────────────────────────────────────────────
-    function renderTabla() {
-        const tbody = document.getElementById("tablaCitas");
-        
-        if (!citas || citas.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">No hay citas registradas</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = citas.map(c => {
-            const paciente = getPacienteInfo(c.id_paciente);
-            const odontologo = getOdontologoInfo(c.id_odontologo);
-            const tratamiento = getTratamientoPorCita(c.id_cita);
-            const fechaHora = `${c.fecha} ${c.hora}`;
-            const estado = c.estado || 'Pendiente';
-            const color = coloresEstado[estado] || 'blue';
-
-            return `
-                <tr>
-                    <td>
-                        <strong>${paciente.nombre}</strong>
-                        <span class="subtext">${paciente.correo}</span>
-                    </td>
-                    <td>
-                        <strong>${odontologo.nombre}</strong>
-                        <span class="subtext">${odontologo.correo}</span>
-                    </td>
-                    <td>${tratamiento}</td>
-                    <td>${fechaHora}</td>
-                    <td><span class="badge ${color}">${estado}</span></td>
-                    <td>
-                        <button class="btn-icon" title="Editar" onclick="editarCita(${c.id_cita})">
-                            <span class="material-symbols-outlined">edit</span>
-                        </button>
-                        <button class="btn-danger" title="Eliminar" onclick="eliminarCita(${c.id_cita})">
-                            <span class="material-symbols-outlined">delete</span>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join("");
-    }
-
-    // ── Actualizar métricas ──────────────────────────────────────────────────
-    function actualizarMetricas() {
-        document.getElementById("cntEspera").textContent = citas.filter(c => c.estado === "En Espera").length;
-        document.getElementById("cntConsulta").textContent = citas.filter(c => c.estado === "En Consulta").length;
-        document.getElementById("cntFinalizado").textContent = citas.filter(c => c.estado === "Finalizado").length;
-    }
-
-    // ── Cargar selectores ─────────────────────────────────────────────────────
-    function cargarSelectores() {
-        const pacienteSelect = document.getElementById("inPaciente");
-        pacienteSelect.innerHTML = pacientes.length > 0 
-            ? pacientes.map(u => `<option value="${u.id_usuario}">${u.correo}</option>`).join("")
-            : '<option value="">No hay pacientes registrados</option>';
-
-        const odontologoSelect = document.getElementById("inOdontologo");
-        odontologoSelect.innerHTML = odontologos.length > 0
-            ? odontologos.map(u => `<option value="${u.id_usuario}">${u.correo}</option>`).join("")
-            : '<option value="">No hay odontólogos registrados</option>';
-
-        const tratamientoSelect = document.getElementById("inTratamiento");
-        tratamientoSelect.innerHTML = tratamientos.length > 0
-            ? tratamientos.map(t => `<option value="${t.id_tratamiento}">${t.nombre}</option>`).join("")
-            : '<option value="">No hay tratamientos registrados</option>';
-    }
-
-    // ── Modal ──────────────────────────────────────────────────────────────────
-    function abrirModal() {
-        document.getElementById("editId").value = "";
-        document.getElementById("modalTitulo").textContent = "Nueva Cita";
-        document.getElementById("inFecha").value = "";
-        document.getElementById("inHora").value = "";
-        document.getElementById("inEstado").value = "En Espera";
-        document.getElementById("inMotivo").value = "";
-        document.getElementById("inObservaciones").value = "";
-        cargarSelectores();
-        document.getElementById("btnGuardarCita").disabled = false;
-        document.getElementById("btnGuardarCita").innerHTML = '<span class="material-symbols-outlined">save</span> Guardar';
-        document.getElementById("modalCita").classList.add("open");
-    }
-
-    function cerrarModal() {
-        document.getElementById("modalCita").classList.remove("open");
-    }
-
-    // ── Editar cita ──────────────────────────────────────────────────────────
-    async function editarCita(id) {
-        try {
-            const c = await api("GET", `/citas/${id}`);
-            cargarSelectores();
-            document.getElementById("editId").value = c.id_cita;
-            document.getElementById("modalTitulo").textContent = "Editar Cita";
-            document.getElementById("inPaciente").value = c.id_paciente;
-            document.getElementById("inOdontologo").value = c.id_odontologo;
-            document.getElementById("inTratamiento").value = c.id_tratamiento || "";
-            document.getElementById("inFecha").value = c.fecha;
-            document.getElementById("inHora").value = c.hora;
-            document.getElementById("inEstado").value = c.estado || "En Espera";
-            document.getElementById("inMotivo").value = c.motivo_consulta || "";
-            document.getElementById("inObservaciones").value = c.observaciones || "";
-            document.getElementById("btnGuardarCita").disabled = false;
-            document.getElementById("btnGuardarCita").innerHTML = '<span class="material-symbols-outlined">save</span> Guardar';
-            document.getElementById("modalCita").classList.add("open");
-        } catch (error) {
-            toast("❌ Error al cargar la cita", "error");
-        }
-    }
-
-    // ── Guardar cita ──────────────────────────────────────────────────────────
-    async function guardarCita() {
-        const id = document.getElementById("editId").value;
-        const id_paciente = parseInt(document.getElementById("inPaciente").value);
-        const id_odontologo = parseInt(document.getElementById("inOdontologo").value);
-        const id_tratamiento = parseInt(document.getElementById("inTratamiento").value);
-        const fecha = document.getElementById("inFecha").value;
-        const hora = document.getElementById("inHora").value;
-        const estado = document.getElementById("inEstado").value;
-        const motivo_consulta = document.getElementById("inMotivo").value.trim();
-        const observaciones = document.getElementById("inObservaciones").value.trim();
-        const btn = document.getElementById("btnGuardarCita");
-
-        if (!id_paciente) { toast("⚠️ Selecciona un paciente", "warning"); return; }
-        if (!id_odontologo) { toast("⚠️ Selecciona un odontólogo", "warning"); return; }
-        if (!id_tratamiento) { toast("⚠️ Selecciona un tratamiento", "warning"); return; }
-        if (!fecha) { toast("⚠️ Selecciona una fecha", "warning"); return; }
-        if (!hora) { toast("⚠️ Selecciona una hora", "warning"); return; }
-
-        btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined spinner">progress_activity</span> Guardando...`;
-
-        try {
-            const data = { id_paciente, id_odontologo, id_tratamiento, fecha, hora, estado, motivo_consulta, observaciones };
-            
-            if (id) {
-                await api("PUT", `/citas/${id}`, data);
-                toast("✅ Cita actualizada correctamente", "success");
-            } else {
-                await api("POST", "/citas", data);
-                toast("✅ Cita creada correctamente", "success");
-            }
-            
-            cerrarModal();
-            await cargarDatos();
-            
-        } catch (error) {
-            toast(`❌ ${error.message || "Error al guardar"}`, "error");
-            btn.disabled = false;
-            btn.innerHTML = `<span class="material-symbols-outlined">save</span> Guardar`;
-        }
-    }
-
-    // ── Eliminar cita ──────────────────────────────────────────────────────────
-    async function eliminarCita(id) {
-        if (!confirm("¿Eliminar esta cita?")) return;
-        try {
-            await api("DELETE", `/citas/${id}`);
-            toast("✅ Cita eliminada correctamente", "success");
-            await cargarDatos();
-        } catch (error) {
-            toast(`❌ ${error.message || "Error al eliminar"}`, "error");
-        }
-    }
-
-    // ── Verificar sesión ─────────────────────────────────────────────────────────
-    const usuarioActual = JSON.parse(localStorage.getItem('usuario_actual') || 'null');
-    if (!usuarioActual) {
-        window.location.href = "login.html";
-    }
-
-    // ── Inicio ─────────────────────────────────────────────────────────────────
-    cargarDatos();
-</script>
+    <script src="../js/citas.js"></script>
 </body>
 </html>
