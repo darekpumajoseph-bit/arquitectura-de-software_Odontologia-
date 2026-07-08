@@ -6,14 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configuración para PostgreSQL - Usando tu base de datos ProyectoApi
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "123456")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "ProyectoApi")  # ← Cambiado a ProyectoApi
+DB_NAME = os.getenv("DB_NAME", "ProyectoApi")
 
-# Construir la URL de conexión
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 print(f"🔗 Conectando a PostgreSQL: {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
